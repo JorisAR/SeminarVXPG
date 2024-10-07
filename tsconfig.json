@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "*": ["*"]
+    },
     "typeRoots": ["./node_modules/@types", "./path/to/your/types"],
     "target": "es5",
     "lib": [

@@ -1,40 +1,52 @@
 // src/Components/Scene/Scene.ts
 import p5 from 'p5';
+import {Rect} from "../Scene/Rect";
+import {SceneObject} from "../Scene/SceneObject";
+import {Vector2} from "../Scene/Vector2";
+import {Camera, Light} from "Components/Scene/Gizmo";
+import {Color} from "Components/Scene/Color";
 
 export class Scene {
-    constructor(private drawOperation: (p: p5, width: number, height: number) => void) {}
+    public scale : Vector2 = Vector2.One;
+    public camera : Camera;
+    public light : Light;
 
-    public Draw(p: p5, width: number, height: number) {
-        this.drawOperation(p, width, height);
+    constructor(private size : Vector2, private objects : SceneObject[]) {
+        objects.push(SceneObject.CreateSceneBounds(size));
+
+        this.camera  = Camera.Create(new Vector2(size.x * 0.2, size.y * 0.2), new Vector2(1, 1).normalize(), Math.PI * 0.5);
+        this.light  = Light.Create(new Vector2(size.x * 0.5, size.y * 0.25), 255, 800);
     }
 
-    public getGeometry(width: number, height: number): { x: number, y: number, w: number, h: number }[] {
-        const DEFAULT_SCENE_WIDTH = 400;
-        const DEFAULT_SCENE_HEIGHT = 400;
-        const w = width / DEFAULT_SCENE_WIDTH;
-        const h = height / DEFAULT_SCENE_HEIGHT;
+    public draw(p: p5) {
+        const scene : Scene = this;
+        this.objects.forEach(function (object) {
+            object.draw(p, scene);
+        });
+    }
 
-        return [
-            { x: 150 * w, y: 150 * h, w: 100 * w, h: 100 * h }, // Big cube in the middle
-            { x: 50 * w, y: 150 * h, w: 50 * w, h: 50 * h },    // Smaller cube on the left
-            { x: 300 * w, y: 150 * h, w: 50 * w, h: 50 * h }    // Smaller cube on the right
-        ];
+    public drawGizmos(p: p5) {
+        const scene : Scene = this;
+        this.light.draw(p, scene);
+        this.camera.draw(p, scene);
+    }
+
+    public getGeometry(scale: Vector2): Rect[] {
+        return this.objects.flatMap(object => object.getColliders(scale));
+    }
+
+    public getSize() : Vector2 {
+        return this.size.multiplyV(this.scale);
     }
 
     public static getPredefinedScenes(): Scene[] {
-        const dinnerTableScene = new Scene((p: p5, width: number, height: number) => {
-            const w = width / 400;
-            const h = height / 400;
-            p.push();
-            p.stroke(0);
-            p.fill(150);
-            // Big cube in the middle
-            p.rect(150 * w, 150 * h, 100 * w, 100 * h);
-            // Smaller cubes on the left and right
-            p.rect(50 * w, 150 * h, 50 * w, 50 * h);
-            p.rect(300 * w, 150 * h, 50 * w, 50 * h);
-            p.pop();
-        });
+        const dinnerTableScene = new Scene(
+            new Vector2(400,400),
+            [
+                SceneObject.CreateTable(new Vector2(105,100)).SetCenter(new Vector2(200,350)).SetColor(new Color(150, 75, 15, 255)),
+                SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(100,375)).SetColor(new Color(100, 40, 15, 255)),
+                SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(300,375)).SetColor(new Color(100, 40, 15, 255)),
+        ]);
 
         return [dinnerTableScene];
     }
