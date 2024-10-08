@@ -1,0 +1,12 @@
+/* src/Components/Pipeline/PipelineTabs.css */
+.PipelineTabs {
+    margin: 20px 0;
+}
+
+.tabs button {
+    margin-right: 10px;
+}
+
+.content {
+    margin-top: 10px;
+}

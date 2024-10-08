@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": "src",
-    "paths": {
-      "*": ["*"]
-    },
-    "typeRoots": ["./node_modules/@types", "./path/to/your/types"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./path/to/your/types"
+    ],
     "target": "es5",
     "lib": [
       "dom",
@@ -23,7 +23,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "preserve"
   },
   "include": [
     "src"

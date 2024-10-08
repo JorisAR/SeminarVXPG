@@ -41,13 +41,19 @@ export class Scene {
 
     public static getPredefinedScenes(): Scene[] {
         const dinnerTableScene = new Scene(
-            new Vector2(400,400),
+            new Vector2(800,400),
             [
                 SceneObject.CreateTable(new Vector2(105,100)).SetCenter(new Vector2(200,350)).SetColor(new Color(150, 75, 15, 255)),
                 SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(100,375)).SetColor(new Color(100, 40, 15, 255)),
                 SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(300,375)).SetColor(new Color(100, 40, 15, 255)),
         ]);
 
-        return [dinnerTableScene];
+        const dinnerTableScene2 = new Scene(
+            new Vector2(400,400),
+            [
+                SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(100,375)).SetColor(new Color(100, 40, 15, 255)),
+            ]);
+
+        return [dinnerTableScene, dinnerTableScene2];
     }
 }

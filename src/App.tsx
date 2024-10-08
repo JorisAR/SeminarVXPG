@@ -1,20 +1,23 @@
 // src/App.tsx
 import React, { useState } from 'react';
 import './App.css';
-import SceneSelector from './Components/Scene/SceneSelector';
 import { Scene } from './Components/Scene/Scene';
-import VoxelGridPanel from './Components/Voxel/VoxelGridPanel';
+import ScenePanel from './Components/Scene/ScenePanel';
+import PipelineTabs from './Components/Pipeline/PipelineTabs';
+import Legend from './Components/Legend/Legend';
+import settings from 'Components/Pipeline/Settings';
 
 const App: React.FC = () => {
-    const [selectedScene, setSelectedScene] = useState<Scene | null>(null);
-
     const scenes = Scene.getPredefinedScenes();
 
     return (
         <div className="App">
-            <h1>Voxel Test</h1>
-            <SceneSelector scenes={scenes} onSelect={setSelectedScene} />
-            {selectedScene && <VoxelGridPanel scene={selectedScene} />}
+            <div className="PipelineTabs">
+                <h1>Real-Time Path Guiding using Bounding Voxel Sampling</h1>
+                <PipelineTabs />
+                <Legend />
+            </div>
+            <ScenePanel settings={settings} />
         </div>
     );
 };
