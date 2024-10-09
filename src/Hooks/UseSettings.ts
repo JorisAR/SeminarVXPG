@@ -1,53 +1,24 @@
-// src/hooks/useSettings.ts
 import { useState, useEffect } from 'react';
-import settings from "Components/Pipeline/Settings";
-
+import settings from 'Components/Pipeline/Settings';
 
 const useSettings = () => {
-    const [voxelSize, setVoxelSize] = useState(settings.voxelSize);
-    const [simulationSpeed, setSimulationSpeed] = useState(settings.simulationSpeed);
-    const [simulationActive, setToggleSimulation] = useState(settings.simulationActive);
-    const [visibleRayCount, setVisibleRayCount] = useState(settings.visibleRayCount);
-    const [selectedTab, setSelectedTab] = useState(settings.selectedTab);
+    const [values, setValues] = useState({ ...settings });
 
     useEffect(() => {
-        const handleVoxelSizeChange = (size: number) => {
-            setVoxelSize(size);
+        // @ts-ignore
+        const updateValues = (newSettings) => {
+            setValues({ ...newSettings });
         };
 
-        const handleSimulationSpeedChange = (speed: number) => {
-            setSimulationSpeed(speed);
-        };
-
-        const handleToggleSimulation = (toggle: boolean) => {
-            setToggleSimulation(toggle);
-        };
-
-        const handleVisibleRayCountChange = (count: number) => {
-            setVisibleRayCount(count);
-        };
-
-        const handleSelectedTabChange = (count: number) => {
-            setSelectedTab(count);
-        };
-
-        settings.on('voxelSizeChange', handleVoxelSizeChange);
-        settings.on('simulationSpeedChange', handleSimulationSpeedChange);
-        settings.on('toggleSimulation', handleToggleSimulation);
-        settings.on('visibleRayCountChange', handleVisibleRayCountChange);
-        settings.on('selectedTabChange', handleSelectedTabChange);
-
+        // Subscribing to all changes from settings
+        settings.on('change', updateValues);
 
         return () => {
-            settings.off('voxelSizeChange', handleVoxelSizeChange);
-            settings.off('simulationSpeedChange', handleSimulationSpeedChange);
-            settings.off('toggleSimulation', handleToggleSimulation);
-            settings.off('visibleRayCountChange', handleVisibleRayCountChange);
-            settings.off('selectedTabChange', handleSelectedTabChange);
+            settings.off('change', updateValues);
         };
     }, []);
 
-    return { voxelSize, simulationSpeed, simulationActive, visibleRayCount, selectedTab};
+    return values;
 };
 
 export default useSettings;

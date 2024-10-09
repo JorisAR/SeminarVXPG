@@ -12,14 +12,14 @@ export class SceneObject {
 
     }
 
-    public getColliders(scale: Vector2) : Rect[] {
-        return this.rects.map((x) => x.scaledV(scale));
+    public getColliders() : Rect[] {
+        return this.rects.map((x) => x);
     }
 
     public draw(p: p5, scene: Scene) : void {
         let scale : number = this.scale;
         this.rects.forEach(function (rect) {
-            rect.draw(p, scene.scale.multiply(scale));
+            rect.draw(p);
         });
     }
 
@@ -64,5 +64,10 @@ export class SceneObject {
     }
 
 
+    applyScale(difference: Vector2) {
+        this.rects.forEach(function (rect) {
+            rect.applyScale(difference);
+        });
+    }
 }
 

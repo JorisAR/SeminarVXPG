@@ -20,7 +20,7 @@ export class Color {
         }
     }
 
-    static CreateRandomSaturated() : Color {
-        return new Color(Math.random() * 255, Math.random() * 255, Math.random()* 255, 255);
+    static CreateRandomSaturated(alpha = 255 ) : Color {
+        return new Color(Math.random() * 255, Math.random() * 255, Math.random()* 255, alpha);
     }
 }

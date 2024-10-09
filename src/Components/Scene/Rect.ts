@@ -10,23 +10,30 @@ export class Rect {
     {
     }
 
-    public draw(p: p5, scale: Vector2 = Vector2.One) : void {
+    public draw(p: p5, color : Color | undefined = undefined) : void {
         p.push();
-        if(this.stroke.a > 0.5)
-            p.stroke(this.stroke.r, this.stroke.g, this.stroke.b, this.stroke.a);
+
+        let stroke = this.stroke;
+        if(color !== undefined) stroke = color;
+
+        if(stroke.a > 0.5)
+            p.stroke(stroke.r, stroke.g, stroke.b, stroke.a);
         else
             p.noStroke();
 
-        if(this.fill.a > 0.5)
-            p.fill(this.fill.r, this.fill.g, this.fill.b, this.fill.a);
+        let fill = this.fill;
+        if(color !== undefined) fill = color;
+
+        if(fill.a > 0.5)
+            p.fill(fill.r, fill.g, fill.b, fill.a);
         else
             p.noFill();
 
         p.rect(
-            (this.position.x) * scale.x,
-            (this.position.y) * scale.y,
-            this.size.x * scale.x,
-            this.size.y * scale.y);
+            (this.position.x),// * scale.x,
+            (this.position.y),// * scale.y,
+            this.size.x,// * scale.x,
+            this.size.y);// * scale.y);
 
         p.pop();
     }
@@ -49,13 +56,8 @@ export class Rect {
         );
     }
 
-    public scaled(scale: number) : Rect {
-        return new Rect(this.position.multiply(scale), this.size.multiply(scale), this.fill, this.stroke);
+    applyScale(difference: Vector2) {
+        this.position = this.position.multiplyV(difference);
+        this.size = this.size.multiplyV(difference);
     }
-
-    public scaledV(scale: Vector2) : Rect {
-        return new Rect(this.position.multiplyV(scale), this.size.multiplyV(scale), this.fill, this.stroke);
-    }
-
-
 }

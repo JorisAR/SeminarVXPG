@@ -17,10 +17,10 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
     const [scene, setScene] = useState(settings.currentScene);
 
     let prevSubdivisions = -1;
-    let sceneGeometry: Rect[] = [];
 
-    scene.scale = new Vector2(2.0);
+    scene.setScale(new Vector2(settings.sceneScale));
     const scaledSize = scene.getSize();
+    let sceneGeometry: Rect[] = scene.getGeometry();
     let voxelGrid = new VoxelGrid(sceneGeometry, scaledSize, subdivisions);
 
 
@@ -29,7 +29,6 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             let frameCounter = 0;
             p.setup = () => {
                 p.createCanvas(scaledSize.x, scaledSize.y).parent(canvasRef.current!);
-                sceneGeometry = scene.getGeometry(scene.scale);
             };
 
             p.draw = () => {
@@ -105,7 +104,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
     }, [settings, scene, subdivisions]);
 
     function lightInjectionStep(): void {
-        let from = scene.camera.getPosition(scene);
+        let from = scene.camera.getPosition();
         let dir = scene.camera.getRandomRayDirection();
         let hit = voxelGrid.raycast(from, dir);
         if (hit) {
@@ -118,7 +117,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             if (hit) {
                 const x2 = hit.point;
                 let light = scene.light;
-                from = light.getPosition(scene);
+                from = light.getPosition();
                 dir = x2.subtract(from).normalize();
                 hit = voxelGrid.raycast(from, dir);
                 if (hit && x2.distanceTo(hit.point) < 5) {
@@ -126,7 +125,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
 
                     let voxel = voxelGrid.getVoxelAt(x2);
                     if (voxel) {
-                        voxel.inject(light.brightnessAt(scene, x2));
+                        voxel.inject(light.brightnessAt(x2));
                     }
                 }
             }

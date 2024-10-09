@@ -42,6 +42,9 @@ export class Vector2 {
     divide(scalar: number): Vector2 {
         return new Vector2(this.x / scalar, this.y / scalar);
     }
+    divideV(scale: Vector2) {
+        return new Vector2(this.x / scale.x, this.y / scale.y);
+    }
 
     reflect(normal: Vector2) {
         return this.subtract(normal.multiply(2 * this.dot(normal)));
@@ -89,4 +92,6 @@ export class Vector2 {
         const angle = (Math.random() - 0.5) * Math.PI; // Random angle between -90 and 90 degrees
         return this.rotate(angle).normalize();
     }
+
+
 }
