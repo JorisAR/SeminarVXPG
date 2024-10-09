@@ -19,4 +19,8 @@ export class Color {
             this.a = a;
         }
     }
+
+    static CreateRandomSaturated() : Color {
+        return new Color(Math.random() * 255, Math.random() * 255, Math.random()* 255, 255);
+    }
 }

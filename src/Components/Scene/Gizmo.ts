@@ -40,6 +40,11 @@ export class Camera extends Gizmo {
         const angle = (Math.random() - 0.5) * this.fov; // Random angle between -90 and 90 degrees
         return this.direction.rotate(angle).normalize();
     }
+
+    public getRayDirection(t: number) : Vector2 {
+        const angle = (t - 0.5) * this.fov; // Random angle between -90 and 90 degrees
+        return this.direction.rotate(angle).normalize();
+    }
 }
 
 export class Light extends Gizmo {

@@ -4,6 +4,10 @@ import {Vector2} from "Components/Scene/Vector2";
 import {Voxel} from "Components/Scene/Voxel";
 import {Rect} from "Components/Scene/Rect";
 import {Color} from "Components/Scene/Color";
+import {ShadingPoint, ShadingPointCluster} from "Components/Scene/ShadingPoint";
+import {Camera} from "Components/Scene/Gizmo";
+import {Scene} from "Components/Scene/Scene";
+import settings from "Components/Pipeline/Settings";
 
 
 interface RaycastHit{
@@ -13,18 +17,22 @@ interface RaycastHit{
 
 
 export class VoxelGrid {
-
     private voxels : Voxel[] = [];
     private rays : Ray[] = [];
+    private cameraFrustum : Ray[] = [];
+    private shadingPointClusters : ShadingPointCluster[] = [];
     public drawRays = true;
 
     constructor(private geometry: Rect[], private size: Vector2, private subdivisions: number) {
         const strokeColor = new Color(255, 105, 180, 255); // Pink color
         const fillColor = new Color(0, 0, 0, 0);
+        const voxelSize = Math.min(size.x, size.y) / Math.pow(2, subdivisions - 1);
+        const clusterEdgeCount = 4; //need ^2 amount of clusters
+        const clusterSize = size.divide(clusterEdgeCount);
 
-        const voxelWidth = Math.min(size.x, size.y);
 
-        const voxelSize = voxelWidth / Math.pow(2, subdivisions - 1);
+
+
         for (let x = 0; x < size.x; x += voxelSize) {
             for (let y = 0; y < size.y; y += voxelSize) {
                 // Check if the grid cell intersects with any scene geometry
@@ -39,6 +47,37 @@ export class VoxelGrid {
         }
     }
 
+    public GenerateShadingPoints(scene : Scene, count: number) {
+        count = Math.max(2, count);
+        const clusterCount = 10;
+        for(let i = 0; i < clusterCount; i++) {
+            this.shadingPointClusters.push(new ShadingPointCluster(Color.CreateRandomSaturated()))
+        }
+
+        const clusterSize = count / clusterCount;
+
+
+
+        for(let i = 0; i < count; i++) {
+            const clusterIndex = Math.floor(i / clusterSize);
+
+            let from = scene.camera.getPosition(scene);
+            let dir = scene.camera.getRayDirection(i / (count - 1));
+            let hit = this.raycast(from, dir);
+
+            if(hit) {
+                const color = new Color(255, 255, 255, 255);
+                this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, color));
+                if(i === 0 || i === count - 1) {
+                    this.cameraFrustum.push(new Ray(from, hit.point, color, 0))
+                }
+            }
+        }
+
+
+    }
+
+
     public addRay(from : Vector2, to: Vector2, color: Color) {
         this.rays.push(new Ray(from, to, color, this.rays.length))
     }
@@ -51,16 +90,28 @@ export class VoxelGrid {
     }
 
 
-    public draw(p: p5, visibleRayCount : number) : void {
+    public draw(p: p5, Settings : any) : void {
         if(this.drawRays) {
             const rayCount : number = this.rays.length - 1;
             this.rays.forEach(function (ray) {
-                ray.draw(p, rayCount, visibleRayCount);
+                ray.draw(p, rayCount, settings.visibleRayCount);
             });
         }
 
+        if(settings.drawShadingPoints) {
+            this.shadingPointClusters.forEach(function (cluster) {
+                cluster.draw(p, settings.useShadingPointClusterColors);
+            });
 
-        this.voxels.forEach((x) => x.draw(p, Vector2.One));
+            this.cameraFrustum.forEach(function (ray) {
+                ray.draw(p, 2, -1);
+            });
+        }
+
+        if(settings.drawVoxels) {
+            this.voxels.forEach((x) => x.draw(p, Vector2.One));
+        }
+
     }
 
     public raycast(from: Vector2, dir: Vector2): RaycastHit | undefined {

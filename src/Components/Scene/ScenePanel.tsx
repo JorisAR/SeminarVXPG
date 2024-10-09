@@ -16,7 +16,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
     const [subdivisions, setSubdivisions] = useState(settings.voxelSize);
     const [scene, setScene] = useState(settings.currentScene);
 
-    let prevSubdivisions = 0;
+    let prevSubdivisions = -1;
     let sceneGeometry: Rect[] = [];
 
     scene.scale = new Vector2(2.0);
@@ -30,7 +30,6 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             p.setup = () => {
                 p.createCanvas(scaledSize.x, scaledSize.y).parent(canvasRef.current!);
                 sceneGeometry = scene.getGeometry(scene.scale);
-                console.log("Scene Setup Complete");
             };
 
             p.draw = () => {
@@ -39,10 +38,10 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
                 if (prevSubdivisions !== subdivisions) {
                     prevSubdivisions = subdivisions;
                     voxelGrid = new VoxelGrid(sceneGeometry, scaledSize, subdivisions);
-                    console.log("yoo!")
+                    voxelGrid.GenerateShadingPoints(scene, 1000);
                 }
                 voxelGrid.drawRays = settings.isLightInjectionStage();
-                voxelGrid.draw(p, settings.visibleRayCount);
+                voxelGrid.draw(p, settings);
                 scene.drawGizmos(p);
 
                 if (settings.simulationActive && settings.isLightInjectionStage()) {

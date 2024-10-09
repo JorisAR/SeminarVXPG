@@ -11,6 +11,11 @@ class Settings extends EventEmitter {
     scenes: Scene[];
     currentScene: Scene;
 
+    drawShadingPoints : boolean = true;
+    useShadingPointClusterColors : boolean = true;
+    drawVoxels : boolean = true;
+    useVoxelClusterColors : boolean = true;
+
     constructor() {
         super();
         this.voxelSize = 5;

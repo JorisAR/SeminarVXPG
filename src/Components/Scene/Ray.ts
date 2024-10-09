@@ -2,6 +2,7 @@ import p5 from "p5";
 import {Color} from "../Scene/Color";
 import {Vector2} from "../Scene/Vector2";
 
+
 export class Ray {
     constructor(public from: Vector2,
                 public to: Vector2,
@@ -14,7 +15,7 @@ export class Ray {
 
         let alpha = 0.5;
         if(visibleRayCount > 0) {
-            if(rayCount - this.index > visibleRayCount * 3) return;
+            if(rayCount - this.index >= visibleRayCount * 3) return;
             alpha = this.index == rayCount ? 1.0 : 0.15;
         }
         p.push();

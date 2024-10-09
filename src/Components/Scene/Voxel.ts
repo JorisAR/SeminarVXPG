@@ -3,6 +3,14 @@ import p5 from "p5";
 import {Vector2} from "Components/Scene/Vector2";
 import {Color} from "Components/Scene/Color";
 
+
+export class VoxelCluster {
+    constructor(public rect : Rect, public voxels : Voxel[], public color : Color) {
+    }
+
+
+}
+
 export class Voxel {
     //should have a rect
     //should have a brightness
