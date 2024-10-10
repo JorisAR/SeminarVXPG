@@ -63,17 +63,25 @@ export class Scene {
                 SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(100,375)).SetColor(new Color(100, 40, 15, 255)),
                 SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(300,375)).SetColor(new Color(100, 40, 15, 255)),
             ],
-            Camera.Create(new Vector2(800 * 0.2, 400 * 0.1), new Vector2(1, 1).normalize(), Math.PI * 0.5),
-            Light.Create(new Vector2(800 * 0.75, 400 * 0.25), 255, 1600));
+            Camera.Create(new Vector2(800 * 0.2, 400 * 0.1), new Vector2(1, 1).normalize(), 90),
+            Light.Create(new Vector2(800 * 0.75, 400 * 0.25), 1, 1600));
+
+        const occludedLightScene = new Scene(
+            new Vector2(800,400),
+            [
+                SceneObject.CreateTable(new Vector2(24,300)).SetCenter(new Vector2(600,150)).SetColor(new Color(150, 150, 150, 255)),
+            ],
+            Camera.Create(new Vector2(800 * 0.2, 400 * 0.7), new Vector2(1, -1).normalize(), 90),
+            Light.Create(new Vector2(800 * 0.9, 400 * 0.25), 1, 1600));
 
         const dinnerTableScene2 = new Scene(
             new Vector2(400,400),
             [
                 SceneObject.CreateTable(new Vector2(49,50)).SetCenter(new Vector2(100,375)).SetColor(new Color(100, 40, 15, 255)),
             ],
-            Camera.Create(new Vector2(400 * 0.2, 400 * 0.1), new Vector2(1, 1).normalize(), Math.PI * 0.5),
-            Light.Create(new Vector2(400 * 0.5, 400 * 0.25), 255, 800));
+            Camera.Create(new Vector2(400 * 0.2, 400 * 0.1), new Vector2(1, 1).normalize(), 90),
+            Light.Create(new Vector2(400 * 0.5, 400 * 0.25), 1, 800));
 
-        return [dinnerTableScene, dinnerTableScene2];
+        return [dinnerTableScene, dinnerTableScene2, occludedLightScene];
     }
 }

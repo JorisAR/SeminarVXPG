@@ -11,6 +11,7 @@ class Settings extends EventEmitter {
     currentScene: Scene  = this.scenes[0];
     voxelSize: number  = 5;
     sceneScale: number = 2.0;
+    cameraFov : number = 90;
 
     //Light Injection
     simulationSpeed: number  = 20;
@@ -37,23 +38,35 @@ class Settings extends EventEmitter {
         return this.selectedTab === 0;
     }
 
-    isLightInjectionStage() {
+    isClusterStage() {
         return this.selectedTab === 1;
     }
 
-    isClusterStage() {
+    isLightInjectionStage() {
         return this.selectedTab === 2;
     }
 
-    isVoxelSelectionStage() {
+    isThroughputStage() {
         return this.selectedTab === 3;
     }
+
+    isVoxelSelectionStage() {
+        return this.selectedTab === 4;
+    }
+
+
 
     //======================================== Scene ========================================
 
     setVoxelSize(size: number) {
         this.voxelSize = size;
         this.emit('voxelSizeChange', size);
+        this.emit('change', this);
+    }
+
+    setCameraFoV(fov: number) {
+        this.cameraFov = fov;
+        this.emit('fovChange', fov);
         this.emit('change', this);
     }
 
@@ -69,7 +82,7 @@ class Settings extends EventEmitter {
 
     setSceneScale(scale: number) {
         this.sceneScale = scale;
-        this.emit('sceneChange', this.currentScene);
+        this.emit('scaleChange', scale);
         this.emit('change', this);
     }
 
@@ -91,8 +104,8 @@ class Settings extends EventEmitter {
         this.emit('resetLightInjection');
     }
 
-    shootLightInjectionRay() {
-        this.emit('shootLightInjectionRay');
+    shootLightInjectionRay(count : number = 1) {
+        this.emit('shootLightInjectionRay', count);
     }
 
     toggleSimulation() {

@@ -93,5 +93,13 @@ export class Vector2 {
         return this.rotate(angle).normalize();
     }
 
+    public toString() : string {
+        return `{${this.x}, ${this.y}}`
+    }
 
+
+    public inverseSquareLawFactor(v: Vector2) : number {
+        const r = this.distanceTo(v);
+        return 4 * Math.PI * r * r;
+    }
 }

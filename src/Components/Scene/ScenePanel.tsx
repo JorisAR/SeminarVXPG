@@ -15,10 +15,13 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
     const [subdivisions, setSubdivisions] = useState(settings.voxelSize);
     const [scene, setScene] = useState(settings.currentScene);
+    const [fov, setFoV] = useState(settings.cameraFov);
+    const [scale, setScale] = useState(settings.sceneScale);
 
     let prevSubdivisions = -1;
 
     scene.setScale(new Vector2(settings.sceneScale));
+    scene.camera.fov = fov;
     const scaledSize = scene.getSize();
     let sceneGeometry: Rect[] = scene.getGeometry();
     let voxelGrid = new VoxelGrid(sceneGeometry, scaledSize, subdivisions);
@@ -69,7 +72,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
         return () => {
             p5Instance.remove();
         };
-    }, [scene, settings, subdivisions]);
+    }, [scene, settings, subdivisions, fov, scale]);
 
     useEffect(() => {
         const handleVoxelSizeChange = (size: number) => {
@@ -81,27 +84,41 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             // Implement reset logic here
         };
 
-        const handleShootLightInjectionRay = () => {
-            lightInjectionStep();
-            console.log("injecting!")
+        const handleShootLightInjectionRay = (count : number) => {
+            for (let i = 0; i < count; i++) {
+                lightInjectionStep();
+            }
         };
 
         const handleSceneChange = (scene: Scene) => {
             setScene(scene);
         };
 
+        const handleFoVChange = (fov : number) => {
+            setFoV(fov);
+        };
+
+
+        const handleScaleChange = (scale : number) => {
+            setScale(scale);
+        };
+
         settings.on('voxelSizeChange', handleVoxelSizeChange);
         settings.on('resetLightInjection', handleResetLightInjection);
         settings.on('shootLightInjectionRay', handleShootLightInjectionRay);
         settings.on('sceneChange', handleSceneChange);
+        settings.on('fovChange', handleFoVChange);
+        settings.on('scaleChange', handleScaleChange);
 
         return () => {
             settings.off('voxelSizeChange', handleVoxelSizeChange);
             settings.off('resetLightInjection', handleResetLightInjection);
             settings.off('shootLightInjectionRay', handleShootLightInjectionRay);
             settings.off('sceneChange', handleSceneChange);
+            settings.off('fovChange', handleFoVChange);
+            settings.off('scaleChange', handleScaleChange);
         };
-    }, [settings, scene, subdivisions]);
+    }, [settings, scene, subdivisions, fov, scale]);
 
     function lightInjectionStep(): void {
         let from = scene.camera.getPosition();

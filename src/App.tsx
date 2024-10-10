@@ -4,7 +4,7 @@ import './App.css';
 import { Scene } from './Components/Scene/Scene';
 import ScenePanel from './Components/Scene/ScenePanel';
 import PipelineTabs from './Components/Pipeline/PipelineTabs';
-import Legend from './Components/Legend/Legend';
+import Description from 'Components/Legend/Description';
 import settings from 'Components/Pipeline/Settings';
 
 const App: React.FC = () => {
@@ -14,8 +14,9 @@ const App: React.FC = () => {
         <div className="App">
             <div className="PipelineTabs">
                 <h1>Real-Time Path Guiding using Bounding Voxel Sampling</h1>
+                <Description />
                 <PipelineTabs />
-                <Legend />
+
             </div>
             <ScenePanel settings={settings} />
         </div>

@@ -1,9 +1,12 @@
 import p5 from "p5";
 import {Color} from "../Scene/Color";
 import {Vector2} from "../Scene/Vector2";
+import {VoxelGrid} from "Components/Scene/VoxelGrid";
+import {VoxelCluster} from "Components/Scene/Voxel";
 
 export class ShadingPointCluster {
     private shadingPoints : ShadingPoint[] = []
+    private throughput : number[] = [];
 
     constructor(public color : Color) {
     }
@@ -18,10 +21,61 @@ export class ShadingPointCluster {
             shadingPoint.draw(p, useClusterColor ? color : undefined);
         });
     }
+
+    public computeThroughput(voxelGrid : VoxelGrid) {
+        this.throughput = []
+        voxelGrid.voxelClusters.forEach((cluster) => {
+            //cluster.voxels
+            let throughput : number  = 0;
+            let n : number = 0;
+            cluster.voxels.forEach((voxel) => {
+                //see if it has LOS
+                let shadingPoint = this.shadingPoints[Math.floor(Math.random() * this.shadingPoints.length)];
+                let from = shadingPoint.position;
+                let dir = voxel.rect.getCenter().subtract(from).normalize();
+                let hit = voxelGrid.raycast(from, dir);
+
+
+                //if(hit !== undefined) console.log(voxel.rect.getCenter().distanceTo(hit.point));
+                if(hit !== undefined && voxel.rect.containsPoint(hit.point)) {
+                    const factor = voxel.rect.getCenter().inverseSquareLawFactor(from)
+                    console.log(factor);
+                    throughput += voxel.getIrradiance() / factor;
+                }
+                n++;
+            })
+            if(n === 0) n = 1;
+            console.log(throughput);
+            this.throughput.push(throughput / n);
+        });
+    }
+
+    public throughputSampleVoxelCluster(voxelGrid : VoxelGrid) {
+        this.shadingPoints.forEach((shadingPoint) => {
+            let i;
+
+            let weights = [this.throughput[0]];
+
+            for (i = 1; i < this.throughput.length; i++)
+                weights[i] = this.throughput[i] + weights[i - 1];
+
+            const random = Math.random() * weights[weights.length - 1];
+
+            for (i = 0; i < weights.length; i++)
+                if (weights[i] > random)
+                    break;
+
+            let cluster = voxelGrid.voxelClusters[i];
+            if(cluster !== undefined) {
+                shadingPoint.sampleVoxel(cluster);
+            }
+        });
+    }
 }
 
 export class ShadingPoint {
     private radius : number = 25;
+    private irradiance : number = 0;
 
     constructor(public position: Vector2,
                 public color: Color = new Color(150))
@@ -42,5 +96,10 @@ export class ShadingPoint {
         p.fill(color.r, color.g, color.b, this.color.a * alpha);
         p.ellipse(this.position.x, this.position.y, this.radius);
         p.pop();
+    }
+
+    public sampleVoxel(voxelCluster: VoxelCluster) {
+        this.irradiance = voxelCluster.powerSampleVoxel().getIrradiance();
+        this.color = new Color(255 * this.irradiance);
     }
 }

@@ -60,4 +60,8 @@ export class Rect {
         this.position = this.position.multiplyV(difference);
         this.size = this.size.multiplyV(difference);
     }
+
+    getCenter() : Vector2 {
+        return this.position.add(this.size.multiply(0.5));
+    }
 }

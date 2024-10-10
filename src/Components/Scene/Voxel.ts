@@ -2,11 +2,10 @@ import {Rect} from "Components/Scene/Rect";
 import p5 from "p5";
 import {Vector2} from "Components/Scene/Vector2";
 import {Color} from "Components/Scene/Color";
-import {ShadingPoint} from "Components/Scene/ShadingPoint";
 
 
 export class VoxelCluster {
-    private voxels : Voxel[] = []
+    public voxels : Voxel[] = []
 
     constructor(public rect : Rect, public color : Color) {
     }
@@ -34,6 +33,21 @@ export class VoxelCluster {
     resetIrradiance() {
         this.voxels.forEach(x => x.resetIrradiance());
     }
+
+    public powerSampleVoxel() {
+        let i;
+        let weights = [this.voxels[0].getIrradiance()];
+        for (i = 1; i < this.voxels.length; i++)
+            weights[i] = this.voxels[i].getIrradiance() + weights[i - 1];
+
+        const random = Math.random() * weights[weights.length - 1];
+
+        for (i = 0; i < weights.length; i++)
+            if (weights[i] > random)
+                break;
+
+        return this.voxels[i];
+    }
 }
 
 export class Voxel {
@@ -56,7 +70,12 @@ export class Voxel {
 
         let c = this.irradiance / this.injectionCount;
 
-        this.rect.fill = new Color(c, c, c, 250);
+        this.rect.fill = new Color(255 * c, 255 * c, 255 * c, 250);
+    }
+
+    public getIrradiance() : number {
+        if(this.injectionCount <= 0) return 0;
+        return this.irradiance / this.injectionCount;
     }
 
     public resetIrradiance() {

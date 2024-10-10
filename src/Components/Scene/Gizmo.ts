@@ -40,13 +40,17 @@ export class Camera extends Gizmo {
         );
     }
 
+    public getFovRadians() : number {
+        return this.fov * Math.PI / 180;
+    }
+
     public getRandomRayDirection() : Vector2 {
-        const angle = (Math.random() - 0.5) * this.fov; // Random angle between -90 and 90 degrees
+        const angle = (Math.random() - 0.5) * this.getFovRadians(); // Random angle between -90 and 90 degrees
         return this.direction.rotate(angle).normalize();
     }
 
     public getRayDirection(t: number) : Vector2 {
-        const angle = (t - 0.5) * this.fov; // Random angle between -90 and 90 degrees
+        const angle = (t - 0.5) * this.getFovRadians(); // Random angle between -90 and 90 degrees
         return this.direction.rotate(angle).normalize();
     }
 }

@@ -11,7 +11,7 @@ export class Color {
             this.r = rOrGray;
             this.g = rOrGray;
             this.b = rOrGray;
-            this.a = 1.0;
+            this.a = 255.0;
         } else {
             this.r = rOrGray;
             this.g = g;
