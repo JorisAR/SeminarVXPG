@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/SeminarVXPG/static/css/main.69de155a.css",
-    "main.js": "/SeminarVXPG/static/js/main.f2e7e9b0.js",
+    "main.js": "/SeminarVXPG/static/js/main.42134628.js",
     "static/js/453.71788a71.chunk.js": "/SeminarVXPG/static/js/453.71788a71.chunk.js",
     "index.html": "/SeminarVXPG/index.html",
     "main.69de155a.css.map": "/SeminarVXPG/static/css/main.69de155a.css.map",
-    "main.f2e7e9b0.js.map": "/SeminarVXPG/static/js/main.f2e7e9b0.js.map",
+    "main.42134628.js.map": "/SeminarVXPG/static/js/main.42134628.js.map",
     "453.71788a71.chunk.js.map": "/SeminarVXPG/static/js/453.71788a71.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.69de155a.css",
-    "static/js/main.f2e7e9b0.js"
+    "static/js/main.42134628.js"
   ]
 }
