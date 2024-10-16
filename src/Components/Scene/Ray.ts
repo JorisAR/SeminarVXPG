@@ -3,20 +3,28 @@ import {Color} from "../Scene/Color";
 import {Vector2} from "../Scene/Vector2";
 
 
-export class Ray {
-    constructor(public from: Vector2,
-                public to: Vector2,
-                public color: Color = new Color(150),
-                public index: number)
-    {
+export class Path {
+    constructor(public rays: Ray[], public index: number) {
     }
 
     public draw(p: p5, rayCount : number, visibleRayCount: number) : void {
+        this.rays.forEach((ray : Ray) => ray.draw(p, rayCount, visibleRayCount, this.index))
+    }
+}
+
+export class Ray {
+    constructor(public from: Vector2,
+                public to: Vector2,
+                public color: Color = new Color(150))
+    {
+    }
+
+    public draw(p: p5, rayCount : number, visibleRayCount: number, index : number) : void {
 
         let alpha = 0.5;
         if(visibleRayCount > 0) {
-            if(rayCount - this.index >= visibleRayCount * 3) return;
-            alpha = this.index == rayCount ? 1.0 : 0.15;
+            if(rayCount - index >= visibleRayCount) return;
+            alpha = index === rayCount ? 1.0 : 0.15;
         }
         p.push();
 

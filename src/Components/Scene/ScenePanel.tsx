@@ -6,6 +6,7 @@ import { Rect } from 'Components/Scene/Rect';
 import { Vector2 } from 'Components/Scene/Vector2';
 import { VoxelGrid } from 'Components/Scene/VoxelGrid';
 import settings from 'Components/Pipeline/Settings';
+import {Light} from "Components/Scene/Gizmo";
 
 interface ScenePanelProps {
     settings: typeof settings;
@@ -127,26 +128,47 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
         if (hit) {
             const camera = from;
             const x1 = hit.point;
+            let light = scene.light;
+            //try to see if we can get direct light:
+            let lightSample = sampleLight(x1, light);
+            if (lightSample) {
+                voxelGrid.addPath(camera, x1, x1, light.getPosition());
+                let voxel = voxelGrid.getVoxelAt(x1);
+                if (voxel) {
+                    voxel.inject(lightSample);
+                }
+                return;
+            }
+
             from = hit.point;
             dir = dir.reflect(hit.normal);
             dir = hit.normal.randomReflection();
             hit = voxelGrid.raycast(from, dir);
             if (hit) {
                 const x2 = hit.point;
-                let light = scene.light;
-                from = light.getPosition();
-                dir = x2.subtract(from).normalize();
-                hit = voxelGrid.raycast(from, dir);
-                if (hit && x2.distanceTo(hit.point) < 5) {
-                    voxelGrid.addRays(camera, x1, x1, x2, from, x2);
+                lightSample = sampleLight(x2, light);
 
+                if (lightSample) {
+                    voxelGrid.addPath(camera, x1, x1, x2, light.getPosition(), x2);
                     let voxel = voxelGrid.getVoxelAt(x2);
                     if (voxel) {
-                        voxel.inject(light.brightnessAt(x2));
+                        voxel.inject(lightSample);
                     }
+                } else {
+                    voxelGrid.addPath(camera, x1, x1, x2);
                 }
             }
         }
+    }
+
+    function sampleLight(point: Vector2, light : Light): number | null {
+        const from = light.getPosition();
+        const dir = point.subtract(from).normalize();
+        const hit = voxelGrid.raycast(from, dir);
+        if (hit && point.distanceTo(hit.point) < 5) {
+            return light.brightnessAt(point);
+        }
+        return null;
     }
 
     return (

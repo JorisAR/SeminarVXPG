@@ -56,13 +56,13 @@ export class Camera extends Gizmo {
 }
 
 export class Light extends Gizmo {
-    constructor(position: Vector2, public brightness: number, public falloff: number,
+    constructor(position: Vector2, public brightness: number,
                 drawOperation : DrawOperation) {
         super(position, drawOperation);
     }
 
-    public static Create(position: Vector2, brightness: number, falloff: number) : Light {
-        return new Light(position, brightness, falloff, (p: p5, position: Vector2) =>
+    public static Create(position: Vector2, brightness: number) : Light {
+        return new Light(position, brightness, (p: p5, position: Vector2) =>
             {
                 p.push();
                 p.fill(255, 255, 0);
@@ -74,8 +74,9 @@ export class Light extends Gizmo {
     }
 
     public brightnessAt(x2: Vector2) : number {
-        const dist = 1.0 - Math.min(this.getPosition().distanceTo(x2) / this.falloff, 1.0);
+        const factor = this.getPosition().inverseSquareLawFactor(x2);
+        //const dist = 1.0 - Math.min(this.getPosition().distanceTo(x2) / this.falloff, 1.0);
 
-        return this.brightness * dist;
+        return this.brightness * factor;
     }
 }

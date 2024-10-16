@@ -1,5 +1,5 @@
 import p5 from "p5";
-import {Ray} from "Components/Scene/Ray";
+import {Path, Ray} from "Components/Scene/Ray";
 import {Vector2} from "Components/Scene/Vector2";
 import {Voxel, VoxelCluster} from "Components/Scene/Voxel";
 import {Rect} from "Components/Scene/Rect";
@@ -18,7 +18,7 @@ interface RaycastHit{
 export class VoxelGrid {
    // private voxels : Voxel[] = [];
     public voxelClusters : VoxelCluster[] = [];
-    private rays : Ray[] = [];
+    private paths : Path[] = [];
     private cameraFrustum : Ray[] = [];
     private shadingPointClusters : ShadingPointCluster[] = [];
     public drawRays = true;
@@ -77,7 +77,7 @@ export class VoxelGrid {
                 const color = new Color(0, 0, 0, 255);
                 this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, color));
                 if(i === 0 || i === count - 1) {
-                    this.cameraFrustum.push(new Ray(from, hit.point, new Color(255, 255, 255, 255), 0))
+                    this.cameraFrustum.push(new Ray(from, hit.point, new Color(255, 255, 255, 255)))
                 }
             }
         }
@@ -91,11 +91,12 @@ export class VoxelGrid {
         });
     }
 
-    public addRays(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2, a3: Vector2, b3: Vector2) {
-        const index = this.rays.length + 2;
-        this.rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255), index))
-        this.rays.push(new Ray(a2, b2, new Color(0, 255, 0, 255), index))
-        this.rays.push(new Ray(a3, b3, new Color(0, 0, 255, 255), index))
+    public addPath(a1: Vector2, b1: Vector2, a2?: Vector2, b2?: Vector2, a3?: Vector2, b3?: Vector2) {
+        let rays = []
+        rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
+        if(a2 && b2) rays.push(new Ray(a2, b2, new Color(0, 255, 0, 255)));
+        if(a3 && b3) rays.push(new Ray(a3, b3, new Color(0, 0, 255, 255)));
+        this.paths.push(new Path(rays, this.paths.length));
 
         this.computeThroughput();
     }
@@ -103,8 +104,8 @@ export class VoxelGrid {
 
     public draw(p: p5, Settings : any) : void {
         if(this.drawRays) {
-            const rayCount : number = this.rays.length - 1;
-            this.rays.forEach(function (ray) {
+            const rayCount : number = this.paths.length - 1;
+            this.paths.forEach(function (ray) {
                 ray.draw(p, rayCount, settings.visibleRayCount);
             });
         }
@@ -118,7 +119,7 @@ export class VoxelGrid {
 
         if(settings.drawShadingPoints) {
             this.cameraFrustum.forEach(function (ray) {
-                ray.draw(p, 2, -1);
+                ray.draw(p, 2, -1, 0);
             });
 
             this.shadingPointClusters.forEach(function (cluster) {
@@ -180,7 +181,8 @@ export class VoxelGrid {
     }
 
     resetRays() {
-        this.rays = [];
+        this.paths = [];
         this.voxelClusters.forEach(x => x.resetIrradiance());
+        this.computeThroughput();
     }
 }

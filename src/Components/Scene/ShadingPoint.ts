@@ -39,13 +39,11 @@ export class ShadingPointCluster {
                 //if(hit !== undefined) console.log(voxel.rect.getCenter().distanceTo(hit.point));
                 if(hit !== undefined && voxel.rect.containsPoint(hit.point)) {
                     const factor = voxel.rect.getCenter().inverseSquareLawFactor(from)
-                    console.log(factor);
-                    throughput += voxel.getIrradiance() / factor;
+                    throughput += voxel.getIrradiance() * factor;
                 }
                 n++;
             })
             if(n === 0) n = 1;
-            console.log(throughput);
             this.throughput.push(throughput / n);
         });
     }
@@ -74,7 +72,7 @@ export class ShadingPointCluster {
 }
 
 export class ShadingPoint {
-    private radius : number = 25;
+    private radius : number = 5;
     private irradiance : number = 0;
 
     constructor(public position: Vector2,
@@ -99,7 +97,9 @@ export class ShadingPoint {
     }
 
     public sampleVoxel(voxelCluster: VoxelCluster) {
-        this.irradiance = voxelCluster.powerSampleVoxel().getIrradiance();
+        const voxel = voxelCluster.powerSampleVoxel();
+        const factor = voxel.rect.getCenter().inverseSquareLawFactor(this.position)
+        this.irradiance = voxel.getIrradiance() * factor * 10;
         this.color = new Color(255 * this.irradiance);
     }
 }
