@@ -99,7 +99,7 @@ export class Vector2 {
 
 
     public inverseSquareLawFactor(v: Vector2) : number {
-        const r = this.distanceTo(v) / 2500 + 0.000001;
+        const r = this.distanceTo(v) / 2 + 0.000001;
         return 1 / (4 * Math.PI * r * r);
     }
 }

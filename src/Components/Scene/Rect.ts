@@ -1,6 +1,7 @@
 import p5 from "p5";
 import {Color} from "../Scene/Color";
 import {Vector2} from "../Scene/Vector2";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 export class Rect {
     constructor(public position: Vector2,
@@ -10,7 +11,8 @@ export class Rect {
     {
     }
 
-    public draw(p: p5, color : Color | undefined = undefined) : void {
+    public draw(settings: RenderCall, color : Color | undefined = undefined) : void {
+        const p = settings.p;
         p.push();
 
         let stroke = this.stroke;
@@ -29,11 +31,9 @@ export class Rect {
         else
             p.noFill();
 
-        p.rect(
-            (this.position.x),// * scale.x,
-            (this.position.y),// * scale.y,
-            this.size.x,// * scale.x,
-            this.size.y);// * scale.y);
+        const pos = this.position.add(settings.offset).multiplyV(settings.scale);
+        const size = this.size.add(settings.offset).multiplyV(settings.scale);
+        p.rect(pos.x, pos.y, size.x, size.y);
 
         p.pop();
     }

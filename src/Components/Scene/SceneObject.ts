@@ -3,11 +3,10 @@ import {Rect} from "../Scene/Rect";
 import {Vector2} from "../Scene/Vector2";
 import {Scene} from "../Scene/Scene";
 import {Color} from "Components/Scene/Color";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 export class SceneObject {
     public position : Vector2 = new Vector2(0,0);
-    public scale : number = 1.0;
-
     constructor(private rects: Rect[], private size : Vector2) {
 
     }
@@ -16,10 +15,9 @@ export class SceneObject {
         return this.rects.map((x) => x);
     }
 
-    public draw(p: p5, scene: Scene) : void {
-        let scale : number = this.scale;
+    public draw(settings: RenderCall) : void {
         this.rects.forEach(function (rect) {
-            rect.draw(p);
+            rect.draw(settings);
         });
     }
 
@@ -54,7 +52,7 @@ export class SceneObject {
         ];
         return new SceneObject(rects, size);
     }
-    public static CreateSceneBounds(size : Vector2, width : number = 5) : SceneObject {
+    public static CreateSceneBounds(size : Vector2, width : number = 0.05) : SceneObject {
         return new SceneObject([
             new Rect(new Vector2(0, 0), new Vector2(size.x, width)),
             new Rect(new Vector2(0, size.y - width), new Vector2(size.x, width)),

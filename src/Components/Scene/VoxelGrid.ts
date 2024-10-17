@@ -7,6 +7,7 @@ import {Color} from "Components/Scene/Color";
 import {ShadingPoint, ShadingPointCluster} from "Components/Scene/ShadingPoint";
 import {Scene} from "Components/Scene/Scene";
 import settings from "Components/Pipeline/Settings";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 
 interface RaycastHit{
@@ -27,7 +28,7 @@ export class VoxelGrid {
         const strokeColor = new Color(255, 105, 180, 255); // Pink color
         const fillColor = new Color(0, 0, 0, 0);
         const voxelSize = Math.min(size.x, size.y) / Math.pow(2, subdivisions - 1);
-        const clusterEdgeCount = 4; //need ^2 amount of clusters
+        const clusterEdgeCount = 4; //need n = k^2 amount of clusters
         const clusterSize = size.divide(clusterEdgeCount);
 
         for (let x = 0; x < size.x; x += clusterSize.x) {
@@ -40,10 +41,10 @@ export class VoxelGrid {
         for (let x = 0; x < size.x; x += voxelSize) {
             for (let y = 0; y < size.y; y += voxelSize) {
                 // Check if the grid cell intersects with any scene geometry
-                let rect = new Rect(new Vector2(x, y), new Vector2(voxelSize - 1, voxelSize - 1), fillColor, strokeColor);
+                let rect = new Rect(new Vector2(x, y), new Vector2(voxelSize, voxelSize), fillColor, strokeColor);
                 for (const other of geometry) {
                     if (rect.collides(other)) {
-                        //this.voxels.push(new Voxel(rect));
+
                         for(const cluster of this.voxelClusters) {
                             if (cluster.rect.containsPoint(new Vector2(x , y))) {
                                 cluster.addVoxel(new Voxel(rect));
@@ -102,28 +103,28 @@ export class VoxelGrid {
     }
 
 
-    public draw(p: p5, Settings : any) : void {
+    public draw(renderCall: RenderCall) : void {
         if(this.drawRays) {
             const rayCount : number = this.paths.length - 1;
             this.paths.forEach(function (ray) {
-                ray.draw(p, rayCount, settings.visibleRayCount);
+                ray.draw(renderCall, rayCount, settings.visibleRayCount);
             });
         }
 
         if(settings.drawVoxels) {
             this.voxelClusters.forEach(function (cluster) {
-                cluster.draw(p, settings.showVoxelClusters);
+                cluster.draw(renderCall, settings.showVoxelClusters);
             });
             //this.voxels.forEach((x) => x.draw(p, Vector2.One));
         }
 
         if(settings.drawShadingPoints) {
             this.cameraFrustum.forEach(function (ray) {
-                ray.draw(p, 2, -1, 0);
+                ray.draw(renderCall, 2, -1, 0);
             });
 
             this.shadingPointClusters.forEach(function (cluster) {
-                cluster.draw(p, settings.showShadingPointClusters);
+                cluster.draw(renderCall, settings.showShadingPointClusters);
             });
         }
     }
@@ -136,7 +137,7 @@ export class VoxelGrid {
             const hit = VoxelGrid.raycastRect(from, dir, rect);
             if (hit) {
                 const distance = from.subtract(hit.point).length();
-                if (distance < minDistance && distance > 0.1) {
+                if (distance < minDistance && distance > 0.001) {
                     minDistance = distance;
                     closestHit = hit;
                 }

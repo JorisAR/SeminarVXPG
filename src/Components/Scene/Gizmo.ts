@@ -1,8 +1,9 @@
 import p5 from "p5";
 import {Vector2} from "../Scene/Vector2";
 import {Scene} from "Components/Scene/Scene";
+import {RenderCall} from "Components/Scene/RenderCall";
 
-export type DrawOperation = (p: p5, position: Vector2) => void;
+export type DrawOperation = (renderCall: RenderCall) => void;
 
 export class Gizmo {
     constructor(private position: Vector2,
@@ -10,16 +11,12 @@ export class Gizmo {
     {
     }
 
-    public draw(p: p5) : void {
-        this.drawOperation(p, this.position);
+    public draw(renderCall: RenderCall) : void {
+        this.drawOperation(renderCall);
     }
 
     public getPosition() : Vector2 {
         return this.position;
-    }
-
-    applyScale(difference: Vector2) {
-        this.position = this.position.multiplyV(difference);
     }
 }
 
@@ -30,11 +27,14 @@ export class Camera extends Gizmo {
     }
 
     public static Create(position: Vector2, direction: Vector2, fov: number) : Camera {
-        return new Camera(position, direction, fov, (p: p5, position: Vector2) =>
+        return new Camera(position, direction, fov, (renderCall: RenderCall) =>
             {
+                const radius = 0.1;
+                const p = renderCall.p;
                 p.push();
                 p.fill(0, 0, 0);
-                p.ellipse(position.x, position.y, 25, 25);
+                p.ellipse(position.x * renderCall.scale.x, position.y * renderCall.scale.y,
+                    radius * renderCall.scale.x, radius * renderCall.scale.y);
                 p.pop();
             }
         );
@@ -62,12 +62,15 @@ export class Light extends Gizmo {
     }
 
     public static Create(position: Vector2, brightness: number) : Light {
-        return new Light(position, brightness, (p: p5, position: Vector2) =>
+        return new Light(position, brightness, (renderCall: RenderCall) =>
             {
+                const radius = 0.1;
+                const p = renderCall.p;
                 p.push();
                 p.fill(255, 255, 0);
                 p.stroke(255, 255, 0);
-                p.ellipse(position.x, position.y, 25, 25);
+                p.ellipse(position.x * renderCall.scale.x, position.y * renderCall.scale.y,
+                    radius * renderCall.scale.x, radius * renderCall.scale.y);
                 p.pop();
             }
         );
@@ -75,8 +78,6 @@ export class Light extends Gizmo {
 
     public brightnessAt(x2: Vector2) : number {
         const factor = this.getPosition().inverseSquareLawFactor(x2);
-        //const dist = 1.0 - Math.min(this.getPosition().distanceTo(x2) / this.falloff, 1.0);
-
         return this.brightness * factor;
     }
 }

@@ -3,6 +3,7 @@ import {Color} from "../Scene/Color";
 import {Vector2} from "../Scene/Vector2";
 import {VoxelGrid} from "Components/Scene/VoxelGrid";
 import {VoxelCluster} from "Components/Scene/Voxel";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 export class ShadingPointCluster {
     private shadingPoints : ShadingPoint[] = []
@@ -15,10 +16,10 @@ export class ShadingPointCluster {
         this.shadingPoints.push(shadingPoint);
     }
 
-    draw(p: p5, useClusterColor: boolean) {
+    draw(settings: RenderCall, useClusterColor: boolean) {
         const color : Color = this.color;
         this.shadingPoints.forEach(function (shadingPoint) {
-            shadingPoint.draw(p, useClusterColor ? color : undefined);
+            shadingPoint.draw(settings, useClusterColor ? color : undefined);
         });
     }
 
@@ -72,7 +73,7 @@ export class ShadingPointCluster {
 }
 
 export class ShadingPoint {
-    private radius : number = 5;
+    private radius : number = 0.05;
     private irradiance : number = 0;
 
     constructor(public position: Vector2,
@@ -80,8 +81,9 @@ export class ShadingPoint {
     {
     }
 
-    public draw(p: p5, color : Color | undefined) : void {
-        let alpha = 1.0;
+    public draw(settings: RenderCall, color : Color | undefined) : void {
+        const alpha = 1.0;
+        const p = settings.p;
 
         if(color === undefined) color = this.color;
 /*
@@ -92,7 +94,8 @@ export class ShadingPoint {
         p.push();
         p.stroke(color.r, color.g, color.b, this.color.a * alpha);
         p.fill(color.r, color.g, color.b, this.color.a * alpha);
-        p.ellipse(this.position.x, this.position.y, this.radius);
+        p.ellipse(this.position.x * settings.scale.x, this.position.y * settings.scale.y,
+            this.radius * settings.scale.x, this.radius * settings.scale.y);
         p.pop();
     }
 

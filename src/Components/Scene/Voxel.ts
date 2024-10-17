@@ -2,6 +2,7 @@ import {Rect} from "Components/Scene/Rect";
 import p5 from "p5";
 import {Vector2} from "Components/Scene/Vector2";
 import {Color} from "Components/Scene/Color";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 
 export class VoxelCluster {
@@ -14,15 +15,15 @@ export class VoxelCluster {
         this.voxels.push(voxel);
     }
 
-    draw(p: p5, useClusterColor: boolean) {
+    public draw(renderCall: RenderCall, useClusterColor: boolean) {
         const color : Color = this.color;
         this.voxels.forEach(function (voxel) {
-            voxel.draw(p, useClusterColor ? color : undefined);// useClusterColor ? color : undefined);
+            voxel.draw(renderCall, useClusterColor ? color : undefined);// useClusterColor ? color : undefined);
         });
     }
 
 
-    tryGetVoxelAt(point: Vector2) : Voxel | undefined {
+    public tryGetVoxelAt(point: Vector2) : Voxel | undefined {
         for (const voxel of this.voxels) {
             if(voxel.rect.containsPoint(point))
                 return voxel;
@@ -60,8 +61,8 @@ export class Voxel {
         this.resetIrradiance();
     }
 
-    public draw(p: p5, color: Color | undefined) : void {
-        this.rect.draw(p, color);
+    public draw(renderCall : RenderCall, color: Color | undefined) : void {
+        this.rect.draw(renderCall, color);
     }
 
     public inject(brightness: number) {

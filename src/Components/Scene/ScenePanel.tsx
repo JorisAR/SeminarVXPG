@@ -7,6 +7,7 @@ import { Vector2 } from 'Components/Scene/Vector2';
 import { VoxelGrid } from 'Components/Scene/VoxelGrid';
 import settings from 'Components/Pipeline/Settings';
 import {Light} from "Components/Scene/Gizmo";
+import {RenderCall} from "Components/Scene/RenderCall";
 
 interface ScenePanelProps {
     settings: typeof settings;
@@ -17,35 +18,37 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
     const [subdivisions, setSubdivisions] = useState(settings.voxelSize);
     const [scene, setScene] = useState(settings.currentScene);
     const [fov, setFoV] = useState(settings.cameraFov);
-    const [scale, setScale] = useState(settings.sceneScale);
+    //const [scale, setScale] = useState(settings.sceneScale);
 
     let prevSubdivisions = -1;
-
-    scene.setScale(new Vector2(settings.sceneScale));
     scene.camera.fov = fov;
-    const scaledSize = scene.getSize();
+    const sceneSize = scene.getSize();
+    const scale = new Vector2(250, 250);
     let sceneGeometry: Rect[] = scene.getGeometry();
-    let voxelGrid = new VoxelGrid(sceneGeometry, scaledSize, subdivisions);
+    let voxelGrid = new VoxelGrid(sceneGeometry, scene.getSize(), subdivisions);
 
 
     useEffect(() => {
         const sketch = (p: p5) => {
             let frameCounter = 0;
             p.setup = () => {
-                p.createCanvas(scaledSize.x, scaledSize.y).parent(canvasRef.current!);
+                p.createCanvas(sceneSize.x * scale.x, sceneSize.y * scale.y).parent(canvasRef.current!);
             };
 
             p.draw = () => {
                 p.background(50);
-                scene.draw(p);
+
+                const renderCall : RenderCall = {p : p, offset : Vector2.Zero, scale : scale }
+
+                scene.draw(renderCall);
                 if (prevSubdivisions !== subdivisions) {
                     prevSubdivisions = subdivisions;
-                    voxelGrid = new VoxelGrid(sceneGeometry, scaledSize, subdivisions);
+                    voxelGrid = new VoxelGrid(sceneGeometry, sceneSize, subdivisions);
                     voxelGrid.GenerateShadingPoints(scene, 1000);
                 }
                 voxelGrid.drawRays = settings.isLightInjectionStage();
-                voxelGrid.draw(p, settings);
-                scene.drawGizmos(p);
+                voxelGrid.draw(renderCall);
+                scene.drawGizmos(renderCall);
 
                 if (settings.simulationActive && settings.isLightInjectionStage()) {
                     const raysPerSecond = settings.simulationSpeed;
@@ -99,17 +102,11 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             setFoV(fov);
         };
 
-
-        const handleScaleChange = (scale : number) => {
-            setScale(scale);
-        };
-
         settings.on('voxelSizeChange', handleVoxelSizeChange);
         settings.on('resetLightInjection', handleResetLightInjection);
         settings.on('shootLightInjectionRay', handleShootLightInjectionRay);
         settings.on('sceneChange', handleSceneChange);
         settings.on('fovChange', handleFoVChange);
-        settings.on('scaleChange', handleScaleChange);
 
         return () => {
             settings.off('voxelSizeChange', handleVoxelSizeChange);
@@ -117,7 +114,6 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
             settings.off('shootLightInjectionRay', handleShootLightInjectionRay);
             settings.off('sceneChange', handleSceneChange);
             settings.off('fovChange', handleFoVChange);
-            settings.off('scaleChange', handleScaleChange);
         };
     }, [settings, scene, subdivisions, fov, scale]);
 
@@ -165,7 +161,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({ settings }) => {
         const from = light.getPosition();
         const dir = point.subtract(from).normalize();
         const hit = voxelGrid.raycast(from, dir);
-        if (hit && point.distanceTo(hit.point) < 5) {
+        if (hit && point.distanceTo(hit.point) < 0.01) {
             return light.brightnessAt(point);
         }
         return null;
