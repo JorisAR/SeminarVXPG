@@ -70,8 +70,6 @@ export class Voxel {
         this.injectionCount++;
 
         let c = this.irradiance / this.injectionCount;
-        console.log(c);
-        //c = 1;
         this.rect.fill = new Color(255 * c, 255 * c, 255 * c, 250);
     }
 

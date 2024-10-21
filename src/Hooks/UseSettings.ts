@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import settings from 'Components/Pipeline/Settings';
+import settings from 'Components/settings/Settings';
 
 const useSettings = () => {
     const [values, setValues] = useState({ ...settings });

@@ -1,7 +1,7 @@
-// src/Components/Pipeline/PipelineTabs.tsx
+// src/Components/settings/PipelineTabs.tsx
 import React from 'react';
 import './PipelineTabs.css';
-import settings from 'Components/Pipeline/Settings';
+import settings from 'Components/settings/Settings';
 import useSettings from 'Hooks/UseSettings';
 
 const SceneSelector: React.FC = () => {
@@ -18,7 +18,7 @@ const SceneSelector: React.FC = () => {
     );
 };
 
-const PipelineTabs: React.FC = () => {
+const SettingsComponent: React.FC = () => {
     useSettings();
 
     const renderContent = () => {
@@ -26,18 +26,8 @@ const PipelineTabs: React.FC = () => {
             case 0:
                 return (
                     <div>
+                        <h2>Scene</h2>
                         <SceneSelector /><br/>
-                        <label>
-                            {"Scene Scale: " + (settings.sceneScale).toString()}<br/>
-                            <input
-                                type="range"
-                                min="0.5"
-                                max="3"
-                                step="0.25"
-                                value={settings.sceneScale}
-                                onChange={(e) => settings.setSceneScale(Number(e.target.value))}
-                            />
-                        </label><br/>
                         <label>
                             {"Voxel Subdivisions: " + (settings.voxelSize - 1).toString()}<br/>
                             <input
@@ -59,22 +49,14 @@ const PipelineTabs: React.FC = () => {
                                 onChange={(e) => settings.setCameraFoV(Number(e.target.value))}
                             />
                         </label>
-                        <div className="Legend">
-                            <strong>Note:</strong> Changing these settings resets the scene.
-
-                            <h2>Brief Paper Overview:</h2>
-                            To achieve more accurate path-guiding with only two samples per pixel, the paper proposes to use a global spatial distribution.
-                            The rendering process is split up in two:
-                            <ul>
-                                <li>Divide the scene into voxels, and inject light into these using a path tracing step.</li>
-                                <li>Select bright voxels efficiently, and use them to guide a path to bright parts in the scene.</li>
-                            </ul>
-                        </div>
+                        <br/>
+                        <strong>Note:</strong> Changing these settings resets the scene.
                     </div>
                 );
             case 1:
                 return (
                     <div>
+                        <h2>Clustering</h2>
                         <h2>Voxels</h2>
                         <label>
                             Show Voxels:
@@ -111,21 +93,14 @@ const PipelineTabs: React.FC = () => {
                                 onChange={(e) => settings.setShowShadingPointClusters(e.target.checked)}
                             />
                         </label>
-                        <div className="Legend">
-                            <h2>Definitions</h2>
-                            <strong>Voxels</strong> is the set of disjoint axis aligned bounding boxes around the geometry. Ideally, they form a tight bound around the scene geometry with positive irradiance.<br/><br/>
-                            <strong>Shading points</strong> is the set of points on the geometry directly seen by the camera.<br/><br/>
-
-
-                            <h2>Clusters</h2>
-                            To more efficiently select voxels, we cluster both shading points and clusters.
-                        </div>
                     </div>
                 );
             case 2:
                 return (
                     <div>
+                        <h2>Light Injection</h2>
                         <label>
+                            {/*{`Raycount: ${settings.}}}<br/>*/}
                             {settings.visibleRayCount <= 0 ? "Show All Rays" :
                                 "Amount of Visible Rays: " + settings.visibleRayCount.toString()}<br/>
                             <input
@@ -154,13 +129,6 @@ const PipelineTabs: React.FC = () => {
                         </label>
                         }<br/>
                         <button onClick={() => settings.resetLightInjection()}>Reset Lightinjection</button>
-                        <div className="Legend">
-                            <ul>
-                                <li><span className="color-box" style={{ backgroundColor: 'red' }}></span>Ray from camera to shading point</li>
-                                <li><span className="color-box" style={{ backgroundColor: 'green' }}></span>BSDF Ray from shading point to a secondary point x2</li>
-                                <li><span className="color-box" style={{ backgroundColor: 'blue' }}></span>Light occlusion rays from x2</li>
-                            </ul>
-                        </div>
                     </div>
                 );
             case 3:
@@ -173,19 +141,10 @@ const PipelineTabs: React.FC = () => {
     };
 
     return (
-        <div className="PipelineTabs">
-            <div className="tabs">
-                <button onClick={() => settings.setSelectedTab(0)}>Scene</button>
-                <button onClick={() => settings.setSelectedTab(1)}>Clustering</button>
-                <button onClick={() => settings.setSelectedTab(2)}>Light Injection</button>
-                <button onClick={() => settings.setSelectedTab(3)}>Throughput</button>
-                <button onClick={() => settings.setSelectedTab(4)}>Voxel Selection</button>
-            </div>
-            <div className="content">
-                {renderContent()}
-            </div>
+        <div className="content">
+            {renderContent()}
         </div>
     );
 };
 
-export default PipelineTabs;
+export default SettingsComponent;

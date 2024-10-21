@@ -6,7 +6,7 @@ import {Rect} from "Components/Scene/Rect";
 import {Color} from "Components/Scene/Color";
 import {ShadingPoint, ShadingPointCluster} from "Components/Scene/ShadingPoint";
 import {Scene} from "Components/Scene/Scene";
-import settings from "Components/Pipeline/Settings";
+import settings from "Components/settings/Settings";
 import {RenderCall} from "Components/Scene/RenderCall";
 
 
@@ -23,8 +23,10 @@ export class VoxelGrid {
     private cameraFrustum : Ray[] = [];
     private shadingPointClusters : ShadingPointCluster[] = [];
     public drawRays = true;
+    private geometry: Rect[];
 
-    constructor(private geometry: Rect[], private size: Vector2, private subdivisions: number) {
+    constructor(private scene: Scene, private size: Vector2, private subdivisions: number) {
+        this.geometry = scene.getGeometry();
         const strokeColor = new Color(255, 105, 180, 255); // Pink color
         const fillColor = new Color(0, 0, 0, 0);
         const voxelSize = Math.min(size.x, size.y) / Math.pow(2, subdivisions - 1);
@@ -42,7 +44,7 @@ export class VoxelGrid {
             for (let y = 0; y < size.y; y += voxelSize) {
                 // Check if the grid cell intersects with any scene geometry
                 let rect = new Rect(new Vector2(x, y), new Vector2(voxelSize, voxelSize), fillColor, strokeColor);
-                for (const other of geometry) {
+                for (const other of this.geometry) {
                     if (rect.collides(other)) {
 
                         for(const cluster of this.voxelClusters) {
@@ -56,9 +58,10 @@ export class VoxelGrid {
                 }
             }
         }
+        this.GenerateShadingPoints(this.scene, 1000);
     }
 
-    public GenerateShadingPoints(scene : Scene, count: number) {
+    private GenerateShadingPoints(scene : Scene, count: number) {
         count = Math.max(2, count);
         const clusterCount = 10;
         for(let i = 0; i < clusterCount; i++) {
