@@ -4,9 +4,10 @@ import './App.css';
 import { Scene } from './Components/Scene/Scene';
 import SceneComponent from 'Components/Scene/SceneComponent';
 import SettingsComponent from 'Components/settings/SettingsComponent';
-import PipelineComponent from 'Components/Legend/PipelineComponent';
+import LegendComponent from 'Components/Legend/LegendComponent';
 import settings from 'Components/settings/Settings';
 import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
+import StatisticsComponent from "Components/Statistics/StatisticsComponent";
 
 const App: React.FC = () => {
     const scenes = Scene.getPredefinedScenes();
@@ -24,7 +25,7 @@ const App: React.FC = () => {
 
     <div className="App" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <div style={{
-            backgroundColor: '#333',
+            backgroundColor: '#010609',
             color: '#fff',
             padding: '10px',
             textAlign: 'center',
@@ -34,26 +35,38 @@ const App: React.FC = () => {
         </div>
         <div style={{ display: 'flex', height: 'calc(100vh - 40px)' }}>
             <PanelGroup direction="horizontal">
-                <Panel defaultSize={65} minSize={10}>
+                <Panel defaultSize={69} minSize={10}>
                     <PanelGroup direction="vertical">
-                        <Panel defaultSize={50} minSize={10}>
+                        <Panel defaultSize={70} minSize={10}>
                             <SceneComponent settings={settings}></SceneComponent>
                         </Panel>
                         <PanelResizeHandle />
                         <Panel minSize={10}>
-                            <div style={{ height: '5px', width: '100%', backgroundColor: '#333' }}></div>
-                            <PipelineComponent></PipelineComponent>
+                            <div className="horizontal-column"></div>
+                            <SettingsComponent></SettingsComponent>
+
                         </Panel>
                     </PanelGroup>
                 </Panel>
                 <PanelResizeHandle />
+
                 <Panel minSize={10}>
-                    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-                        <div style={{ width: '5px', height: '100%', backgroundColor: '#333' }}></div>
-                        <div style={{ flex: 1, padding: '10px', overflowY: 'auto', height: '100%' }}>
-                            <SettingsComponent></SettingsComponent>
+                    <div className="container">
+                        <div className="vertical-column"></div>
+                        <div className="main-content">
+                            <PanelGroup direction="vertical">
+                                <Panel defaultSize={60} minSize={10}>
+                                    <LegendComponent />
+                                </Panel>
+                                <PanelResizeHandle />
+                                <Panel minSize={10}>
+                                    <div className="horizontal-column"></div>
+                                    <StatisticsComponent />
+                                </Panel>
+                            </PanelGroup>
                         </div>
                     </div>
+
                 </Panel>
             </PanelGroup>
         </div>

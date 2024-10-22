@@ -1,13 +1,15 @@
 import p5 from "p5";
 import {Path, Ray} from "Components/Scene/Ray";
 import {Vector2} from "Components/Scene/Vector2";
-import {Voxel, VoxelCluster} from "Components/Scene/Voxel";
+import {Voxel} from "Components/Scene/Voxel";
 import {Rect} from "Components/Scene/Rect";
 import {Color} from "Components/Scene/Color";
-import {ShadingPoint, ShadingPointCluster} from "Components/Scene/ShadingPoint";
+import {ShadingPoint} from "Components/Scene/ShadingPoint";
 import {Scene} from "Components/Scene/Scene";
 import settings from "Components/settings/Settings";
 import {RenderCall} from "Components/Scene/RenderCall";
+import {ShadingPointCluster} from "Components/Scene/ShadingPointCluster";
+import {VoxelCluster} from "Components/Scene/VoxelCluster";
 
 
 interface RaycastHit{
@@ -35,7 +37,11 @@ export class VoxelGrid {
 
         for (let x = 0; x < size.x; x += clusterSize.x) {
             for (let y = 0; y < size.y; y += clusterSize.y) {
-                let cluster = new VoxelCluster(new Rect(new Vector2(x, y), new Vector2(clusterSize.x, clusterSize.y)), Color.CreateRandomSaturated(150));
+                let cluster = new VoxelCluster(
+                    new Rect(new Vector2(x, y), new Vector2(clusterSize.x, clusterSize.y)),
+                    Color.CreateRandomSaturated(150),
+                    this.voxelClusters.length);
+
                 this.voxelClusters.push(cluster);
             }
         }
@@ -126,8 +132,13 @@ export class VoxelGrid {
                 ray.draw(renderCall, 2, -1, 0);
             });
 
-            this.shadingPointClusters.forEach(function (cluster) {
+            for (const cluster of this.shadingPointClusters) {
+                if(renderCall.selectedShadingCluster && renderCall.selectedShadingCluster !== cluster) continue;
                 cluster.draw(renderCall, settings.showShadingPointClusters);
+                //cluster.rect?.draw(renderCall, cluster.color);
+            }
+            this.shadingPointClusters.forEach(function (cluster) {
+
             });
         }
     }
@@ -140,7 +151,7 @@ export class VoxelGrid {
             const hit = VoxelGrid.raycastRect(from, dir, rect);
             if (hit) {
                 const distance = from.subtract(hit.point).length();
-                if (distance < minDistance && distance > 0.001) {
+                if (distance < minDistance && distance > 0.0001) {
                     minDistance = distance;
                     closestHit = hit;
                 }
@@ -174,6 +185,16 @@ export class VoxelGrid {
         );
 
         return { point, normal };
+    }
+
+    public getShadingPointClusterAt(point: Vector2) : ShadingPointCluster | undefined {
+
+        for (const cluster of this.shadingPointClusters) {
+            if(cluster.rect?.containsPoint(point)) {
+                return cluster;
+            }
+        }
+        return undefined;
     }
 
     public getVoxelAt(point: Vector2) : Voxel | undefined {

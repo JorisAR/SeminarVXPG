@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Scene } from 'Components/Scene/Scene';
-import { Vector2 } from 'Components/Scene/Vector2';
 import settings from 'Components/settings/Settings';
 import { SceneRenderer } from './SceneRenderer';
+import Statistics from "Components/Statistics/Statistics";
 
 interface ScenePanelProps {
     settings: typeof settings;
@@ -57,6 +57,7 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
 
         const handleResetLightInjection = () => {
             rendererRef.current?.voxelGrid.resetRays();
+            Statistics.injectionRayCount = 0;
             // Implement reset logic here
         };
 
@@ -89,7 +90,7 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
         };
     }, [settings, scene]);
 
-    return <div ref={canvasRef} style={{ width: '100%', height: '100%' }}></div>;
+    return <div ref={canvasRef} style={{ width: '100%', height: '100%', backgroundColor:"black" }}></div>;
 };
 
 export default SceneComponent;

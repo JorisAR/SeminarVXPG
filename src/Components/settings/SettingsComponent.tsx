@@ -1,7 +1,7 @@
 // src/Components/settings/PipelineTabs.tsx
 import React from 'react';
-import './PipelineTabs.css';
-import settings from 'Components/settings/Settings';
+import 'Components/settings/Settings.css';
+import settings, {Tab} from 'Components/settings/Settings';
 import useSettings from 'Hooks/UseSettings';
 
 const SceneSelector: React.FC = () => {
@@ -23,21 +23,11 @@ const SettingsComponent: React.FC = () => {
 
     const renderContent = () => {
         switch (settings.selectedTab) {
-            case 0:
+            case Tab.Scene:
                 return (
                     <div>
-                        <h2>Scene</h2>
-                        <SceneSelector /><br/>
-                        <label>
-                            {"Voxel Subdivisions: " + (settings.voxelSize - 1).toString()}<br/>
-                            <input
-                                type="range"
-                                min="3"
-                                max="8"
-                                value={settings.voxelSize}
-                                onChange={(e) => settings.setVoxelSize(Number(e.target.value))}
-                            />
-                        </label><br/>
+                        <strong>Note:</strong> Changing these settings resets the scene. <br/><br/>
+                        <SceneSelector/><br/>
                         <label>
                             {"Camera Field Of View: " + (settings.cameraFov).toString()}<br/>
                             <input
@@ -49,15 +39,11 @@ const SettingsComponent: React.FC = () => {
                                 onChange={(e) => settings.setCameraFoV(Number(e.target.value))}
                             />
                         </label>
-                        <br/>
-                        <strong>Note:</strong> Changing these settings resets the scene.
                     </div>
                 );
-            case 1:
+            case Tab.Clustering:
                 return (
                     <div>
-                        <h2>Clustering</h2>
-                        <h2>Voxels</h2>
                         <label>
                             Show Voxels:
                             <input
@@ -74,9 +60,6 @@ const SettingsComponent: React.FC = () => {
                                 onChange={(e) => settings.setShowVoxelClusters(e.target.checked)}
                             />
                         </label><br/>
-
-
-                        <h2>Shading Points</h2>
                         <label>
                             Show Shading Points
                             <input
@@ -95,10 +78,9 @@ const SettingsComponent: React.FC = () => {
                         </label>
                     </div>
                 );
-            case 2:
+            case Tab.LightInjection:
                 return (
                     <div>
-                        <h2>Light Injection</h2>
                         <label>
                             {/*{`Raycount: ${settings.}}}<br/>*/}
                             {settings.visibleRayCount <= 0 ? "Show All Rays" :
@@ -106,7 +88,7 @@ const SettingsComponent: React.FC = () => {
                             <input
                                 type="range"
                                 min="0"
-                                max="30"
+                                max="500"
                                 value={settings.visibleRayCount}
                                 onChange={(e) => settings.setVisibleRayCount(Number(e.target.value))}
                             />
@@ -131,18 +113,48 @@ const SettingsComponent: React.FC = () => {
                         <button onClick={() => settings.resetLightInjection()}>Reset Lightinjection</button>
                     </div>
                 );
-            case 3:
-                return <div>Controls for Stage 4</div>;
-            case 4:
+            case Tab.Throughput:
+                return (
+                    <div>
+                        Hover over any shading point cluster to see the throughput between each voxel cluster.
+                    </div>
+                );
+            case Tab.VoxelSelection:
                 return <div>Controls for Stage 5</div>;
+            case Tab.GeometryInjection:
+                return (
+                    <div>
+                        <label>
+                            {"Voxel Subdivisions: " + (settings.voxelSize - 1).toString()}<br/>
+                            <input
+                                type="range"
+                                min="3"
+                                max="8"
+                                value={settings.voxelSize}
+                                onChange={(e) => settings.setVoxelSize(Number(e.target.value))}
+                            />
+                        </label><br/>
+                    </div>
+                );
             default:
                 return null;
         }
     };
 
     return (
-        <div className="content">
-            {renderContent()}
+        <div className="content" style={{ width: '100%', height: '100%' }}>
+            <div className="tabs">
+                <button onClick={() => settings.setSelectedTab(Tab.Scene)} className={settings.selectedTab === Tab.Scene ? "selected" : ""}>Scene</button>
+                <button onClick={() => settings.setSelectedTab(Tab.GeometryInjection)} className={settings.selectedTab === Tab.GeometryInjection ? "selected" : ""}>Geometry Injection</button>
+                <button onClick={() => settings.setSelectedTab(Tab.LightInjection)} className={settings.selectedTab === Tab.LightInjection ? "selected" : ""}>Light Injection</button>
+                <button onClick={() => settings.setSelectedTab(Tab.Clustering)} className={settings.selectedTab === Tab.Clustering ? "selected" : ""}>Clustering</button>
+                <button onClick={() => settings.setSelectedTab(Tab.Throughput)} className={settings.selectedTab === Tab.Throughput ? "selected" : ""}>Throughput</button>
+                <button onClick={() => settings.setSelectedTab(Tab.VoxelSelection)} className={settings.selectedTab === Tab.VoxelSelection ? "selected" : ""}>Voxel Selection</button>
+                <div className="highlight-bar"></div>
+            </div>
+            <div className="box">
+                {renderContent()}
+            </div>
         </div>
     );
 };

@@ -1,55 +1,8 @@
 import {Rect} from "Components/Scene/Rect";
-import p5 from "p5";
-import {Vector2} from "Components/Scene/Vector2";
 import {Color} from "Components/Scene/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
+import {Vector2} from "Components/Scene/Vector2";
 
-
-export class VoxelCluster {
-    public voxels : Voxel[] = []
-
-    constructor(public rect : Rect, public color : Color) {
-    }
-
-    public addVoxel(voxel : Voxel) {
-        this.voxels.push(voxel);
-    }
-
-    public draw(renderCall: RenderCall, useClusterColor: boolean) {
-        const color : Color = this.color;
-        this.voxels.forEach(function (voxel) {
-            voxel.draw(renderCall, useClusterColor ? color : undefined);// useClusterColor ? color : undefined);
-        });
-    }
-
-
-    public tryGetVoxelAt(point: Vector2) : Voxel | undefined {
-        for (const voxel of this.voxels) {
-            if(voxel.rect.containsPoint(point))
-                return voxel;
-        }
-        return  undefined;
-    }
-
-    resetIrradiance() {
-        this.voxels.forEach(x => x.resetIrradiance());
-    }
-
-    public powerSampleVoxel() {
-        let i;
-        let weights = [this.voxels[0].getIrradiance()];
-        for (i = 1; i < this.voxels.length; i++)
-            weights[i] = this.voxels[i].getIrradiance() + weights[i - 1];
-
-        const random = Math.random() * weights[weights.length - 1];
-
-        for (i = 0; i < weights.length; i++)
-            if (weights[i] > random)
-                break;
-
-        return this.voxels[i];
-    }
-}
 
 export class Voxel {
     //should have a rect
@@ -70,7 +23,7 @@ export class Voxel {
         this.injectionCount++;
 
         let c = this.irradiance / this.injectionCount;
-        this.rect.fill = new Color(255 * c, 255 * c, 255 * c, 250);
+        this.rect.fill = Color.ColorFromIrradiance(c);
     }
 
     public getIrradiance() : number {

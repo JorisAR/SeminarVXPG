@@ -23,4 +23,17 @@ export class Color {
     static CreateRandomSaturated(alpha = 255 ) : Color {
         return new Color(Math.random() * 255, Math.random() * 255, Math.random()* 255, alpha);
     }
+
+    static ColorFromNormalizedIrradiance(irradiance: number) {
+        return new Color(irradiance * 255, irradiance * 255, irradiance * 255, 255);
+    }
+
+    static ColorFromIrradiance(irradiance: number) {
+        const gamma = 2.2; // Common value for gamma correction
+        const normalizedIrradiance = Math.pow(irradiance, 1 / gamma); // Apply gamma correction
+        const clampedIrradiance = Math.min(Math.max(normalizedIrradiance, 0), 1); // Clamp the value between 0 and 1
+        const colorValue = clampedIrradiance * 255;
+        return new Color(colorValue, colorValue, colorValue, 255);
+    }
+
 }

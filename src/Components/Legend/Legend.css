@@ -1,11 +1,26 @@
-/* src/Components/Legend/Legend.css */
-.Legend {
-    margin: 20px 0;
-}
-
 .color-box {
     display: inline-block;
     width: 20px;
     height: 20px;
     margin-right: 10px;
+}
+
+h3 {
+    color: #838f8e;
+    font-style: italic;
+    margin-top: -22px;
+}
+
+/* unvisited link */
+a:link {
+    color: #3d5969;
+}
+
+/* visited link */
+a:visited {
+    color: #3d5969;
+}
+
+a:hover {
+    color: #236b91;
 }

@@ -47,6 +47,12 @@ export class Rect {
         );
     }
 
+    public merge(point: Vector2) : Rect {
+        const min = point.min(this.position);
+        const max = point.max(this.getEnd());
+        return new Rect(min, max.subtract(min), this.fill, this.stroke);
+    }
+
     public containsPoint(point: Vector2) : boolean {
         return (
             point.x >= this.position.x &&
@@ -63,5 +69,9 @@ export class Rect {
 
     getCenter() : Vector2 {
         return this.position.add(this.size.multiply(0.5));
+    }
+
+    getEnd() : Vector2 {
+        return this.position.add(this.size);
     }
 }

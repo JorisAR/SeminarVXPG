@@ -1,10 +1,18 @@
-// src/Settings.ts
 import { EventEmitter } from 'events';
 import { Scene } from 'Components/Scene/Scene';
-import {Vector2} from "Components/Scene/Vector2";
+
+export enum Tab {
+    Scene,
+    GeometryInjection,
+    LightInjection,
+    Clustering ,
+    Throughput,
+    VoxelSelection ,
+}
 
 class Settings extends EventEmitter {
-    selectedTab:number =0;
+
+    selectedTab: Tab = Tab.Scene;
 
     //Scene
     scenes: Scene[]  = Scene.getPredefinedScenes();
@@ -19,42 +27,21 @@ class Settings extends EventEmitter {
     simulationActive: boolean  = false;
 
     //Clustering
-    drawShadingPoints : boolean = true;
-    showShadingPointClusters : boolean = false;
-    drawVoxels : boolean = true;
-    showVoxelClusters : boolean = false;
+    private _drawShadingPoints : boolean = true;
+    private _showShadingPointClusters : boolean = true;
+    private _drawVoxels : boolean = true;
+    private _showVoxelClusters : boolean = true;
 
     constructor() {
         super();
     }
 
     //======================================== Tabs ========================================
-    setSelectedTab(number: number) {
-        this.selectedTab = number;
-        this.emit('selectedTabChange', number);
+    setSelectedTab(tab: Tab) {
+        this.selectedTab = tab;
+        this.emit('selectedTabChange', tab);
         this.emit('change', this);
     }
-    isSceneStage() {
-        return this.selectedTab === 0;
-    }
-
-    isClusterStage() {
-        return this.selectedTab === 1;
-    }
-
-    isLightInjectionStage() {
-        return this.selectedTab === 2;
-    }
-
-    isThroughputStage() {
-        return this.selectedTab === 3;
-    }
-
-    isVoxelSelectionStage() {
-        return this.selectedTab === 4;
-    }
-
-
 
     //======================================== Scene ========================================
 
@@ -115,23 +102,42 @@ class Settings extends EventEmitter {
     }
 
     //======================================== clusters ========================================
+
+    get showVoxelClusters(): boolean {
+        if(this.selectedTab !== Tab.Clustering) return false;
+        return this._showVoxelClusters;
+    }
+    get drawVoxels(): boolean {
+        if(this.selectedTab !== Tab.Clustering) return true;
+        return this._drawVoxels;
+    }
+    get showShadingPointClusters(): boolean {
+        if(this.selectedTab !== Tab.Clustering) return false;
+        return this._showShadingPointClusters;
+    }
+
+    get drawShadingPoints(): boolean {
+        if(this.selectedTab !== Tab.Clustering) return true;
+        return this._drawShadingPoints;
+    }
+
     setShowVoxelClusters(checked: boolean) {
-        this.showVoxelClusters = checked;
+        this._showVoxelClusters = checked;
         this.emit('change', this);
     }
 
     setShowShadingPointClusters(checked: boolean) {
-        this.showShadingPointClusters = checked;
+        this._showShadingPointClusters = checked;
         this.emit('change', this);
     }
 
     setDrawShadingPoints(checked: boolean) {
-        this.drawShadingPoints = checked;
+        this._drawShadingPoints = checked;
         this.emit('change', this);
     }
 
     setDrawVoxels(checked: boolean) {
-        this.drawVoxels = checked;
+        this._drawVoxels = checked;
         this.emit('change', this);
     }
 }

@@ -1,0 +1,46 @@
+.PipelineTabs {
+    margin: 20px 0;
+}
+
+.tabs button {
+    margin-right: 10px;
+}
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    position: relative; /* Add this */
+}
+
+
+.tabs button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    background-color: #1b2b34;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    z-index: 2;
+}
+
+.tabs .highlight-bar {
+    height: 5px;
+    width: 100%;
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    background-color: #236b91;
+    z-index: 3;
+}
+
+.tabs button:hover {
+    background-color: #3d5969;
+}
+
+.tabs button.selected {
+    background-color: #236b91;
+    margin-top: -0px;
+}
+
