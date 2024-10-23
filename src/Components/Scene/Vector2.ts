@@ -1,3 +1,6 @@
+import {RenderCall} from "Components/Scene/RenderCall";
+import {Color} from "Components/Scene/Color";
+
 export class Vector2 {
     x: number;
     y: number;
@@ -111,4 +114,46 @@ export class Vector2 {
         const r = this.distanceTo(v) / 2 + 0.000001;
         return 1 / (4 * Math.PI * r * r);
     }
+
+    public angle() : number {
+        return Math.atan2(this.y, this.x);
+    }
+
+    public drawArrow(settings: RenderCall, from: Vector2, color: Color = new Color(0, 255, 0, 150)) {
+        const p = settings.p;
+        const length = 100; // Arrow length
+        const angle = this.angle();
+        let dir = this.normalize();
+        const arrowTip = from.add(dir.multiply(length));
+        const arrowTipBase = from.add(dir.multiply(length * 0.8));
+        const leftWing = arrowTipBase.add(new Vector2(-dir.y, dir.x).normalize().multiply(5));
+        const rightWing = arrowTipBase.add(new Vector2(dir.y, -dir.x).normalize().multiply(5));
+
+        p.push();
+        p.noFill();
+
+        p.strokeWeight(3);
+        p.beginShape();
+
+        p.vertex(from.x, from.y);
+        p.vertex(arrowTipBase.x, arrowTipBase.y);
+        p.vertex(leftWing.x, leftWing.y);
+        p.vertex(arrowTip.x, arrowTip.y);
+        p.vertex(rightWing.x, rightWing.y);
+        p.vertex(arrowTipBase.x, arrowTipBase.y);
+
+
+        p.stroke(color.r, color.g, color.b, color.a);
+        p.endShape();
+
+        // Now apply the alpha value
+
+
+        p.pop();
+
+
+    }
+
+
+
 }

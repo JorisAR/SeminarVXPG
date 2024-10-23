@@ -14,6 +14,7 @@ export class ShadingPointCluster {
     constructor(public color: Color) {
     }
 
+
     public addShadingPoint(shadingPoint: ShadingPoint) {
         this.shadingPoints.push(shadingPoint);
         const offset = new Vector2(0.05, 0.05);
@@ -24,10 +25,15 @@ export class ShadingPointCluster {
         }
     }
 
-    draw(settings: RenderCall, useClusterColor: boolean) {
+    public draw(settings: RenderCall, useClusterColor: boolean, startIndex : number) {
         const color: Color = this.color;
+        if(settings.selectedShadingCluster != undefined)
+            this.rect?.draw(settings, new Color(255, 255, 255 ,15));
+
+        let i = startIndex;
         this.shadingPoints.forEach(function (shadingPoint) {
-            shadingPoint.draw(settings, useClusterColor ? color : undefined);
+            shadingPoint.draw(settings, useClusterColor ? color : undefined, i);
+            i++;
         });
     }
 
@@ -41,12 +47,14 @@ export class ShadingPointCluster {
             cluster.voxels.forEach((voxel) => {
                 //see if it has Line of sight
                 const shadingPoint = this.shadingPoints[Math.floor(Math.random() * this.shadingPoints.length)];
-                const from = voxel.rect.getCenter();
-                const to = shadingPoint.position;
+                const to = voxel.rect.getCenter();
+                const from = shadingPoint.position;
                 const dir = to.subtract(from).normalize();
                 const hit = voxelGrid.raycast(from, dir);
 
-                if (hit !== undefined && hit.point.distanceTo(to) < 0.01) {
+
+
+                if (hit !== undefined && voxel.rect.containsPoint(hit.point)) { //hit.point.distanceTo(to) < 0.01
                     const factor = to.inverseSquareLawFactor(from)
                     throughput += voxel.getIrradiance() * factor;
                 }
@@ -88,8 +96,27 @@ export class ShadingPointCluster {
         });
     }
 
+    public pathTrace(voxelGrid: VoxelGrid): void {
+        this.shadingPoints.forEach((shadingPoint) => {
+            shadingPoint.setIrradiance(shadingPoint.pathTrace(voxelGrid));
+        });
+    }
+
     public getNormalizedThroughput(i : number) : number {
         if(i < 0 || i >= this.normalizedThroughput.length) return 0;
         return this.normalizedThroughput[i];
+    }
+
+    public getClosestShadingPoint(position: Vector2) : ShadingPoint {
+        let closest = this.shadingPoints[0];
+        let min : number = Infinity;
+        this.shadingPoints.forEach(x =>{
+            let d = x.position.distanceTo(position);
+            if(d < min) {
+                closest = x;
+                min = d;
+            }
+        });
+        return closest;
     }
 }

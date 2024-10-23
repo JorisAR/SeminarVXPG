@@ -2,24 +2,28 @@ import { EventEmitter } from 'events';
 import { Scene } from 'Components/Scene/Scene';
 
 export enum Tab {
+    Overview,
     Scene,
     GeometryInjection,
     LightInjection,
     Clustering ,
     Throughput,
-    VoxelSelection ,
+    VoxelSampling ,
 }
 
 class Settings extends EventEmitter {
-
-    selectedTab: Tab = Tab.Scene;
+    public selectedTab: Tab = Tab.Overview;
 
     //Scene
-    scenes: Scene[]  = Scene.getPredefinedScenes();
-    currentScene: Scene  = this.scenes[0];
-    voxelSize: number  = 5;
-    sceneScale: number = 2.0;
-    cameraFov : number = 90;
+    public scenes: Scene[]  = Scene.getPredefinedScenes();
+    public currentScene: Scene  = this.scenes[0];
+
+    public sceneScale: number = 2.0;
+    public cameraFov : number = 90;
+
+    //Geometry Injection
+    public tightBounds: boolean = false;
+    public voxelSize: number  = 5;
 
     //Light Injection
     simulationSpeed: number  = 20;
@@ -31,6 +35,13 @@ class Settings extends EventEmitter {
     private _showShadingPointClusters : boolean = true;
     private _drawVoxels : boolean = true;
     private _showVoxelClusters : boolean = true;
+
+    //intra-voxel sampling
+    public voxelSamplingShowArrows = true;
+    public voxelSamplingSPFrequency = 10; //one in n samplingpoints are rendered
+    public voxelSamplingForcePT = false;
+    private _voxelSamplingPrettyRenderer = false;
+
 
     constructor() {
         super();
@@ -49,6 +60,15 @@ class Settings extends EventEmitter {
         this.voxelSize = size;
         this.emit('voxelSizeChange', size);
         this.emit('change', this);
+    }
+
+
+    ToggleGeometryInjection() {
+        this.tightBounds = !this.tightBounds;
+        if(!this.tightBounds)
+            this.emit('voxelSizeChange', this.voxelSize);
+        this.emit('change', this);
+        this.emit('injectGeometry', this);
     }
 
     setCameraFoV(fov: number) {
@@ -117,7 +137,8 @@ class Settings extends EventEmitter {
     }
 
     get drawShadingPoints(): boolean {
-        if(this.selectedTab !== Tab.Clustering) return true;
+        if(this.selectedTab !== Tab.Clustering)
+            return this.selectedTab === Tab.Throughput || this.selectedTab === Tab.VoxelSampling ;
         return this._drawShadingPoints;
     }
 
@@ -139,6 +160,39 @@ class Settings extends EventEmitter {
     setDrawVoxels(checked: boolean) {
         this._drawVoxels = checked;
         this.emit('change', this);
+    }
+
+    //======================================== voxel sampling ========================================
+
+    toggleForcePT() {
+        this.voxelSamplingForcePT = !this.voxelSamplingForcePT;
+        this.emit('change', this);
+        this.recomputeGI()
+    }
+
+    toggleShowArrows() {
+        this.voxelSamplingShowArrows = !this.voxelSamplingShowArrows;
+        this.emit('change', this);
+    }
+
+    setVisibleArrowCount(count: number) {
+        this.voxelSamplingSPFrequency = count;
+        this.emit('change', this);
+    }
+
+    recomputeGI() {
+        this.emit('recomputeGI');
+    }
+
+    togglePrettyRenderer() {
+        this._voxelSamplingPrettyRenderer = !this._voxelSamplingPrettyRenderer;
+        this.emit('change', this);
+        this.emit('setPrettyRenderer');
+    }
+
+    get voxelSamplingPrettyRenderer(): boolean {
+        if(this.selectedTab !== Tab.VoxelSampling) return false;
+        return this._voxelSamplingPrettyRenderer;
     }
 }
 export default new Settings();

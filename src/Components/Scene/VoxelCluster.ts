@@ -19,8 +19,7 @@ export class VoxelCluster {
         let color: Color = this.color;
         if(renderCall.selectedShadingCluster) {
             useClusterColor = true;
-            color = Color.ColorFromNormalizedIrradiance(renderCall.selectedShadingCluster.getNormalizedThroughput(this.index));
-            color.a = 200;
+            color = Color.ColorFromNormalizedIrradiance(renderCall.selectedShadingCluster.getNormalizedThroughput(this.index), 200);
         }
         this.voxels.forEach(function (voxel) {
             voxel.draw(renderCall, useClusterColor ? color : undefined);// useClusterColor ? color : undefined);

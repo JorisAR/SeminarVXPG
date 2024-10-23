@@ -27,18 +27,24 @@ export class Camera extends Gizmo {
     }
 
     public static Create(position: Vector2, direction: Vector2, fov: number) : Camera {
-        return new Camera(position, direction, fov, (renderCall: RenderCall) =>
-            {
-                const radius = 0.1;
-                const p = renderCall.p;
-                p.push();
-                p.fill(0, 0, 0);
-                p.ellipse(position.x * renderCall.scale.x, position.y * renderCall.scale.y,
-                    radius * renderCall.scale.x, radius * renderCall.scale.y);
-                p.pop();
-            }
-        );
+        return new Camera(position, direction, fov, (renderCall: RenderCall) => {
+            const p = renderCall.p;
+            const size = 0.1;
+            const triangleSize = 0.05;
+            const offset = -1.5 * size;
+            p.push();
+            p.translate(position.x * renderCall.scale.x, position.y * renderCall.scale.y);
+            p.rotate(direction.angle());
+            p.fill(0, 0, 0);
+            p.rect((offset - size) / 2 * renderCall.scale.x, -size / 2 * renderCall.scale.y, size * renderCall.scale.x, size * renderCall.scale.y, 2);
+            p.triangle(
+                0, -triangleSize * renderCall.scale.y,
+                -size  / 2 * renderCall.scale.x, 0,
+                0, triangleSize * renderCall.scale.y);
+            p.pop();
+        });
     }
+
 
     public getFovRadians() : number {
         return this.fov * Math.PI / 180;
@@ -62,19 +68,30 @@ export class Light extends Gizmo {
     }
 
     public static Create(position: Vector2, brightness: number) : Light {
-        return new Light(position, brightness, (renderCall: RenderCall) =>
-            {
-                const radius = 0.1;
-                const p = renderCall.p;
-                p.push();
-                p.fill(255, 255, 0);
-                p.stroke(255, 255, 0);
-                p.ellipse(position.x * renderCall.scale.x, position.y * renderCall.scale.y,
-                    radius * renderCall.scale.x, radius * renderCall.scale.y);
-                p.pop();
+        return new Light(position, brightness, (renderCall: RenderCall) => {
+            const p = renderCall.p;
+            const radius = 0.1;
+            const lineLength = 0.05;
+            const wave = Math.sin( 2 * p.frameCount / p.getTargetFrameRate()) * 0.01 - 0.075;
+
+            p.push();
+            p.fill(255, 255, 0);
+            p.stroke(255, 255, 0);
+            p.ellipse(position.x * renderCall.scale.x, position.y * renderCall.scale.y, radius * renderCall.scale.x, radius * renderCall.scale.y);
+
+            for (let angle = 0; angle < 360; angle += 45) {
+                const x = Math.cos(p.radians(angle)) * (radius + wave) * renderCall.scale.x;
+                const y = Math.sin(p.radians(angle)) * (radius + wave) * renderCall.scale.y;
+                const x2 = Math.cos(p.radians(angle)) * (radius + lineLength + wave) * renderCall.scale.x;
+                const y2 = Math.sin(p.radians(angle)) * (radius + lineLength + wave) * renderCall.scale.y;
+                p.strokeWeight(5);
+                p.line(position.x * renderCall.scale.x + x, position.y * renderCall.scale.y + y, position.x * renderCall.scale.x + x2, position.y * renderCall.scale.y + y2);
             }
-        );
+
+            p.pop();
+        });
     }
+
 
     public brightnessAt(x2: Vector2) : number {
         const factor = this.getPosition().inverseSquareLawFactor(x2);

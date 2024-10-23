@@ -53,6 +53,46 @@ export class Rect {
         return new Rect(min, max.subtract(min), this.fill, this.stroke);
     }
 
+    public union(other: Rect): Rect {
+        const minX = Math.min(this.position.x, other.position.x);
+        const minY = Math.min(this.position.y, other.position.y);
+        const maxX = Math.max(this.position.x + this.size.x, other.position.x + other.size.x);
+        const maxY = Math.max(this.position.y + this.size.y, other.position.y + other.size.y);
+        return new Rect(new Vector2(minX, minY), new Vector2(maxX - minX, maxY - minY), this.fill, this.stroke);
+    }
+
+    public intersection(other: Rect): Rect | undefined {
+        const minX = Math.max(this.position.x, other.position.x);
+        const minY = Math.max(this.position.y, other.position.y);
+        const maxX = Math.min(this.position.x + this.size.x, other.position.x + other.size.x);
+        const maxY = Math.min(this.position.y + this.size.y, other.position.y + other.size.y);
+
+        if (minX < maxX && minY < maxY) {
+            return new Rect(new Vector2(minX, minY), new Vector2(maxX - minX, maxY - minY), this.fill, this.stroke);
+        } else {
+            // Return an "empty" rectangle if they do not intersect
+            return undefined;
+        }
+    }
+
+    public unionIntersections(rects: Rect[], buffer: number): Rect {
+        let result : Rect | undefined = undefined;
+        for (const rect of rects) {
+            if (this.collides(rect)) {
+                const intersection = this.intersection(rect.grow(buffer));
+                if(intersection) {
+                    if(result === undefined)
+                        result = intersection;
+                    else
+                        result = result.union(intersection);
+                }
+            }
+        }
+        if(result === undefined) return this;
+        return result;
+    }
+
+
     public containsPoint(point: Vector2) : boolean {
         return (
             point.x >= this.position.x &&
@@ -62,16 +102,27 @@ export class Rect {
         );
     }
 
-    applyScale(difference: Vector2) {
-        this.position = this.position.multiplyV(difference);
-        this.size = this.size.multiplyV(difference);
+    public applyScale(scale: Vector2): void {
+        this.position = this.position.multiplyV(scale);
+        this.size = this.size.multiplyV(scale);
     }
 
-    getCenter() : Vector2 {
+    public getCenter() : Vector2 {
         return this.position.add(this.size.multiply(0.5));
     }
 
-    getEnd() : Vector2 {
+    public getEnd() : Vector2 {
         return this.position.add(this.size);
     }
+
+    public grow(amount : number): Rect {
+        return new Rect(
+            this.position.subtract(Vector2.One.multiply(amount)),
+            this.size.add(Vector2.One.multiply(2.0 * amount)),
+            this.fill,
+            this.stroke,
+            );
+    }
+
+
 }

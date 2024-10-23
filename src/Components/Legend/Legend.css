@@ -11,6 +11,10 @@ h3 {
     margin-top: -22px;
 }
 
+h2 {
+    margin-top: -5px;
+}
+
 /* unvisited link */
 a:link {
     color: #3d5969;

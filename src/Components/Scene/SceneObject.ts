@@ -4,6 +4,7 @@ import {Vector2} from "../Scene/Vector2";
 import {Scene} from "../Scene/Scene";
 import {Color} from "Components/Scene/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
+import Settings from "Components/settings/Settings";
 
 export class SceneObject {
     public position : Vector2 = new Vector2(0,0);
@@ -15,9 +16,9 @@ export class SceneObject {
         return this.rects.map((x) => x);
     }
 
-    public draw(settings: RenderCall) : void {
+    public draw(settings: RenderCall, color : Color | undefined) : void {
         this.rects.forEach(function (rect) {
-            rect.draw(settings);
+            rect.draw(settings, color);
         });
     }
 
@@ -49,6 +50,12 @@ export class SceneObject {
             new Rect(new Vector2(0, 0), new Vector2(size.x, size.y * 0.25)),
             new Rect(new Vector2(0, size.y * 0.25), new Vector2(legWidth, size.y * 0.75)),
             new Rect(new Vector2(size.x - legWidth, size.y * 0.25), new Vector2(legWidth, size.y * 0.75)),
+        ];
+        return new SceneObject(rects, size);
+    }
+    public static CreateSquare(size : Vector2) : SceneObject {
+        let rects = [
+            new Rect(new Vector2(0, 0), new Vector2(size.x, size.y)),
         ];
         return new SceneObject(rects, size);
     }

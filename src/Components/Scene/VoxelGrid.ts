@@ -10,6 +10,7 @@ import settings from "Components/settings/Settings";
 import {RenderCall} from "Components/Scene/RenderCall";
 import {ShadingPointCluster} from "Components/Scene/ShadingPointCluster";
 import {VoxelCluster} from "Components/Scene/VoxelCluster";
+import Settings from "Components/settings/Settings";
 
 
 interface RaycastHit{
@@ -26,8 +27,9 @@ export class VoxelGrid {
     private shadingPointClusters : ShadingPointCluster[] = [];
     public drawRays = true;
     private geometry: Rect[];
+    private clusterSize: number = 0;
 
-    constructor(private scene: Scene, private size: Vector2, private subdivisions: number) {
+    constructor(public scene: Scene, private size: Vector2, private subdivisions: number) {
         this.geometry = scene.getGeometry();
         const strokeColor = new Color(255, 105, 180, 255); // Pink color
         const fillColor = new Color(0, 0, 0, 0);
@@ -52,7 +54,6 @@ export class VoxelGrid {
                 let rect = new Rect(new Vector2(x, y), new Vector2(voxelSize, voxelSize), fillColor, strokeColor);
                 for (const other of this.geometry) {
                     if (rect.collides(other)) {
-
                         for(const cluster of this.voxelClusters) {
                             if (cluster.rect.containsPoint(new Vector2(x , y))) {
                                 cluster.addVoxel(new Voxel(rect));
@@ -65,6 +66,9 @@ export class VoxelGrid {
             }
         }
         this.GenerateShadingPoints(this.scene, 1000);
+        this.computeGI();
+
+        this.injectGeometry()
     }
 
     private GenerateShadingPoints(scene : Scene, count: number) {
@@ -74,10 +78,10 @@ export class VoxelGrid {
             this.shadingPointClusters.push(new ShadingPointCluster(Color.CreateRandomSaturated(255)))
         }
 
-        const clusterSize = count / clusterCount;
+        this.clusterSize = count / clusterCount;
 
         for(let i = 0; i < count; i++) {
-            const clusterIndex = Math.floor(i / clusterSize);
+            const clusterIndex = Math.floor(i / this.clusterSize);
 
             let from = scene.camera.getPosition();
             let dir = scene.camera.getRayDirection(i / (count - 1));
@@ -85,7 +89,7 @@ export class VoxelGrid {
 
             if(hit) {
                 const color = new Color(0, 0, 0, 255);
-                this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, color));
+                this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, hit.normal, color));
                 if(i === 0 || i === count - 1) {
                     this.cameraFrustum.push(new Ray(from, hit.point, new Color(255, 255, 255, 255)))
                 }
@@ -93,22 +97,40 @@ export class VoxelGrid {
         }
     }
 
-    public computeThroughput() {
+    public computeGI() {
         const voxelGrid : VoxelGrid = this;
         this.shadingPointClusters.forEach(function (cluster) {
             cluster.computeThroughput(voxelGrid);
             cluster.throughputSampleVoxelCluster(voxelGrid);
+            cluster.pathTrace(voxelGrid);
         });
     }
 
-    public addPath(a1: Vector2, b1: Vector2, a2?: Vector2, b2?: Vector2, a3?: Vector2, b3?: Vector2) {
+    public addDirectPath(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2) {
         let rays = []
         rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
-        if(a2 && b2) rays.push(new Ray(a2, b2, new Color(0, 255, 0, 255)));
-        if(a3 && b3) rays.push(new Ray(a3, b3, new Color(0, 0, 255, 255)));
+        rays.push(new Ray(a2, b2, new Color(0, 0, 255, 255)));
+        this.paths.push(new Path(rays, this.paths.length));
+        this.computeGI();
+    }
+
+    public addMissedPath(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2) {
+        let rays = []
+        rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
+        rays.push(new Ray(a2, b2, new Color(5, 15, 5, 255)));
         this.paths.push(new Path(rays, this.paths.length));
 
-        this.computeThroughput();
+        this.computeGI();
+    }
+
+    public addFullPath(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2, a3: Vector2, b3: Vector2) {
+        let rays = []
+        rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
+        rays.push(new Ray(a2, b2, new Color(0, 255, 0, 255)));
+        rays.push(new Ray(a3, b3, new Color(0, 0, 255, 255)));
+        this.paths.push(new Path(rays, this.paths.length));
+
+        this.computeGI();
     }
 
 
@@ -127,14 +149,16 @@ export class VoxelGrid {
             //this.voxels.forEach((x) => x.draw(p, Vector2.One));
         }
 
-        if(settings.drawShadingPoints) {
-            this.cameraFrustum.forEach(function (ray) {
-                ray.draw(renderCall, 2, -1, 0);
-            });
+        this.cameraFrustum.forEach(function (ray) {
+            ray.draw(renderCall, 2, -1, 0);
+        });
 
+        if(settings.drawShadingPoints) {
+            let i = 0;
             for (const cluster of this.shadingPointClusters) {
                 if(renderCall.selectedShadingCluster && renderCall.selectedShadingCluster !== cluster) continue;
-                cluster.draw(renderCall, settings.showShadingPointClusters);
+                cluster.draw(renderCall, settings.showShadingPointClusters, i);
+                i += this.clusterSize;
                 //cluster.rect?.draw(renderCall, cluster.color);
             }
             this.shadingPointClusters.forEach(function (cluster) {
@@ -151,7 +175,8 @@ export class VoxelGrid {
             const hit = VoxelGrid.raycastRect(from, dir, rect);
             if (hit) {
                 const distance = from.subtract(hit.point).length();
-                if (distance < minDistance && distance > 0.0001) {
+                //if normal dot dir >= 0 and dist low, then we discard the hit, as from is likely on the edge of the hit object.
+                if (distance < minDistance && !(hit.normal.dot(dir) >= 0 && distance < 0.001)) {
                     minDistance = distance;
                     closestHit = hit;
                 }
@@ -187,6 +212,27 @@ export class VoxelGrid {
         return { point, normal };
     }
 
+    private getCollidingGeometry(collider: Rect, geometry: Rect[]) : Rect[] {
+        const result : Rect[] = [];
+        geometry.forEach(g => {
+            g.collides(collider)
+            result.push(g);
+        });
+        return result;
+    }
+
+    public injectGeometry() : void {
+        if(!settings.tightBounds) return;
+        this.voxelClusters.forEach((cluster, clusterIndex) => {
+            const clusterGeometry = this.getCollidingGeometry(cluster.rect, this.geometry);
+            cluster.voxels.forEach((voxel, index) => {
+                const g = this.getCollidingGeometry(voxel.rect, clusterGeometry)
+                voxel.rect = voxel.rect.unionIntersections(g, 0.01);
+                this.voxelClusters[clusterIndex].voxels[index] = voxel; // Ensure the voxel in the array is updated
+            });
+        });
+    }
+
     public getShadingPointClusterAt(point: Vector2) : ShadingPointCluster | undefined {
 
         for (const cluster of this.shadingPointClusters) {
@@ -208,6 +254,6 @@ export class VoxelGrid {
     resetRays() {
         this.paths = [];
         this.voxelClusters.forEach(x => x.resetIrradiance());
-        this.computeThroughput();
+        this.computeGI();
     }
 }

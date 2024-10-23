@@ -75,11 +75,21 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
             rendererRef.current?.UpdateFoV();
         };
 
+        const handleInjectGeometry = (fov : number) => {
+            rendererRef.current?.InjectGeometry();
+        };
+
+        const handleRecomputeGI = (fov : number) => {
+            rendererRef.current?.voxelGrid.computeGI();
+        };
+
         settings.on('voxelSizeChange', handleVoxelSizeChange);
         settings.on('resetLightInjection', handleResetLightInjection);
         settings.on('shootLightInjectionRay', handleShootLightInjectionRay);
         settings.on('sceneChange', handleSceneChange);
         settings.on('fovChange', handleFoVChange);
+        settings.on('injectGeometry', handleInjectGeometry);
+        settings.on('recomputeGI', handleRecomputeGI);
 
         return () => {
             settings.off('voxelSizeChange', handleVoxelSizeChange);
@@ -87,6 +97,8 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
             settings.off('shootLightInjectionRay', handleShootLightInjectionRay);
             settings.off('sceneChange', handleSceneChange);
             settings.off('fovChange', handleFoVChange);
+            settings.off('injectGeometry', handleInjectGeometry);
+            settings.off('recomputeGI', handleRecomputeGI);
         };
     }, [settings, scene]);
 
