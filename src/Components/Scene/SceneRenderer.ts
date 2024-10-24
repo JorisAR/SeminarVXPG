@@ -27,7 +27,6 @@ export class SceneRenderer {
         this.scene = scene;
         this.scene.camera.fov = settings.cameraFov;
         this.voxelGrid = new VoxelGrid(scene, this.scene.getSize(), settings.voxelSize);
-        Statistics.Reset();
 
         this.p5Instance = new p5((p: p5) => {
 
@@ -122,7 +121,6 @@ export class SceneRenderer {
     public UpdateVoxelGridSize() : void {
         this.prevSubdivisions = settings.voxelSize;
         this.voxelGrid = new VoxelGrid(this.scene, this.scene.getSize(), settings.voxelSize);
-        Statistics.Reset();
     }
 
     public lightInjectionStep(dir? : Vector2): void {

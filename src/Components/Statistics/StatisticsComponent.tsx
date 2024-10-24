@@ -14,7 +14,10 @@ const StatisticsComponent: React.FC = () => {
 
             <div className="box">
                 <h2>Statistics: </h2>
-                Injection Ray Count: {statistics.injectionRayCount}
+                Voxel Count: {statistics.voxelCount} <br/>
+                ShadingPoint Count: {statistics.shadingPointCount} <br/>
+                Injection Ray Count: {statistics.injectionRayCount} <br/>
+                PathTracing hit percentage Count: {statistics.pathTracingHitPercentage}% <br/>
             </div>
         </div>
     );

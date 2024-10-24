@@ -33,7 +33,7 @@ const App: React.FC = () => {
         }}>
             Real-Time Path Guiding using Bounding Voxel Sampling
         </div>
-        <div style={{ display: 'flex', height: 'calc(100vh - 40px)' }}>
+        <div style={{ display: 'flex', height: 'calc(100vh - 41px)' }}>
             <PanelGroup direction="horizontal">
                 <Panel defaultSize={69} minSize={10}>
                     <PanelGroup direction="vertical">

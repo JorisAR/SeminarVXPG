@@ -5,6 +5,7 @@ import {VoxelCluster} from "Components/Scene/VoxelCluster";
 import {Voxel} from "Components/Scene/Voxel";
 import {VoxelGrid} from "Components/Scene/VoxelGrid";
 import Settings, {Tab} from "Components/settings/Settings";
+import Statistics from "Components/Statistics/Statistics";
 
 export class ShadingPoint {
     private radius : number = 0.05;
@@ -54,7 +55,8 @@ export class ShadingPoint {
         let lightSample = voxelGrid.scene.sampleLight(this.position, voxelGrid);
 
         if (lightSample) {
-            this.pathTraceDir = voxelGrid.scene.light.getPosition().subtract(this.position).normalize()
+            this.pathTraceDir = voxelGrid.scene.light.getPosition().subtract(this.position).normalize();
+            Statistics.pathTracingHitCount++;
             return lightSample;
         }
 
@@ -66,6 +68,7 @@ export class ShadingPoint {
         if (hit) {
             lightSample = voxelGrid.scene.sampleLight(hit.point, voxelGrid);
             if (lightSample) {
+                Statistics.pathTracingHitCount++;
                 return lightSample;
             }
         }

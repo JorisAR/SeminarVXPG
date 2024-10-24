@@ -11,6 +11,7 @@ import {RenderCall} from "Components/Scene/RenderCall";
 import {ShadingPointCluster} from "Components/Scene/ShadingPointCluster";
 import {VoxelCluster} from "Components/Scene/VoxelCluster";
 import Settings from "Components/settings/Settings";
+import Statistics from "Components/Statistics/Statistics";
 
 
 interface RaycastHit{
@@ -30,6 +31,8 @@ export class VoxelGrid {
     private clusterSize: number = 0;
 
     constructor(public scene: Scene, private size: Vector2, private subdivisions: number) {
+        Statistics.Reset();
+
         this.geometry = scene.getGeometry();
         const strokeColor = new Color(255, 105, 180, 255); // Pink color
         const fillColor = new Color(0, 0, 0, 0);
@@ -57,6 +60,7 @@ export class VoxelGrid {
                         for(const cluster of this.voxelClusters) {
                             if (cluster.rect.containsPoint(new Vector2(x , y))) {
                                 cluster.addVoxel(new Voxel(rect));
+                                Statistics.voxelCount += 1;
                                 break;
                             }
                         }
@@ -67,7 +71,6 @@ export class VoxelGrid {
         }
         this.GenerateShadingPoints(this.scene, 1000);
         this.computeGI();
-
         this.injectGeometry()
     }
 
@@ -90,6 +93,7 @@ export class VoxelGrid {
             if(hit) {
                 const color = new Color(0, 0, 0, 255);
                 this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, hit.normal, color));
+                Statistics.shadingPointCount += 1;
                 if(i === 0 || i === count - 1) {
                     this.cameraFrustum.push(new Ray(from, hit.point, new Color(255, 255, 255, 255)))
                 }
@@ -99,6 +103,7 @@ export class VoxelGrid {
 
     public computeGI() {
         const voxelGrid : VoxelGrid = this;
+        Statistics.pathTracingHitCount = 0;
         this.shadingPointClusters.forEach(function (cluster) {
             cluster.computeThroughput(voxelGrid);
             cluster.throughputSampleVoxelCluster(voxelGrid);

@@ -181,7 +181,7 @@ const SettingsComponent: React.FC = () => {
     };
 
     return (
-        <div className="content" style={{ width: '100%', height: '100%' }}>
+        <div className="content" style={{ width: '100%', height: '100%', overflow:'scroll'}}>
             <div className="tabs">
                 <button onClick={() => settings.setSelectedTab(Tab.Overview)} className={settings.selectedTab === Tab.Overview ? "selected" : ""}>Overview</button>
                 <button onClick={() => settings.setSelectedTab(Tab.Scene)} className={settings.selectedTab === Tab.Scene ? "selected" : ""}>Scene</button>
