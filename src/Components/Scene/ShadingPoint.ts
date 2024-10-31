@@ -1,11 +1,12 @@
-import {Color} from "../Scene/Color";
-import {Vector2} from "../Scene/Vector2";
+import {Color} from "Components/Util/Color";
+import {Vector2} from "Components/Util/Vector2";
 import {RenderCall} from "Components/Scene/RenderCall";
 import {VoxelCluster} from "Components/Scene/VoxelCluster";
 import {Voxel} from "Components/Scene/Voxel";
 import {VoxelGrid} from "Components/Scene/VoxelGrid";
-import Settings, {Tab} from "Components/settings/Settings";
+import Settings, {Tab} from "Components/Settings/Settings";
 import Statistics from "Components/Statistics/Statistics";
+import settings from "Components/Settings/Settings";
 
 export class ShadingPoint {
     private radius : number = 0.05;
@@ -37,6 +38,11 @@ export class ShadingPoint {
         p.push();
         p.stroke(color.r, color.g, color.b, this.color.a * alpha);
         p.fill(color.r, color.g, color.b, this.color.a * alpha);
+        if(Settings.voxelSamplingPrettyRenderer) {
+            p.drawingContext.shadowBlur = 16 * color.getIntensity();
+            p.drawingContext.shadowColor = p.color(color.r, color.g, color.b, 150);
+        }
+
         p.ellipse(this.position.x * settings.scale.x, this.position.y * settings.scale.y,
             this.radius * settings.scale.x, this.radius * settings.scale.y);
         p.pop();
@@ -51,22 +57,22 @@ export class ShadingPoint {
     }
 
     //get light at.
-    public pathTrace(voxelGrid: VoxelGrid): number {
-        let lightSample = voxelGrid.scene.sampleLight(this.position, voxelGrid);
+    public pathTrace(): number {
+        let lightSample = settings.scene.sampleLight(this.position);
 
         if (lightSample) {
-            this.pathTraceDir = voxelGrid.scene.light.getPosition().subtract(this.position).normalize();
+            this.pathTraceDir = settings.scene.light.getPosition().subtract(this.position).normalize();
             Statistics.pathTracingHitCount++;
             return lightSample;
         }
 
-        this.pathTraceDir = this.sampledVoxel?.rect.getCenter().subtract(this.position).normalize() ?? this.normal.randomReflection();
+        this.pathTraceDir = this.sampledVoxel?.rect.getRandomPointWithin().subtract(this.position).normalize() ?? this.normal.randomReflection();
         if(Settings.voxelSamplingForcePT) this.pathTraceDir = this.normal.randomReflection();
 
-        const hit = voxelGrid.raycast(this.position, this.pathTraceDir);
+        const hit = settings.scene.raycast(this.position, this.pathTraceDir);
 
         if (hit) {
-            lightSample = voxelGrid.scene.sampleLight(hit.point, voxelGrid);
+            lightSample = settings.scene.sampleLight(hit.point);
             if (lightSample) {
                 Statistics.pathTracingHitCount++;
                 return lightSample;

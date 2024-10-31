@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import './App.css';
 import { Scene } from './Components/Scene/Scene';
 import SceneComponent from 'Components/Scene/SceneComponent';
-import SettingsComponent from 'Components/settings/SettingsComponent';
+import SettingsComponent from 'Components/Settings/SettingsComponent';
 import LegendComponent from 'Components/Legend/LegendComponent';
-import settings from 'Components/settings/Settings';
+import settings from 'Components/Settings/Settings';
 import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
 import StatisticsComponent from "Components/Statistics/StatisticsComponent";
 
@@ -20,7 +20,7 @@ const App: React.FC = () => {
         //         <PipelineTabs />
         //
         //     </div>
-        //     <ScenePanel settings={settings} />
+        //     <ScenePanel Settings={Settings} />
         // </div>
 
     <div className="App" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

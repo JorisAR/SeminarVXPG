@@ -1,7 +1,7 @@
 // src/Components/Legend/Legend.tsx
 import React from 'react';
 import './Legend.css';
-import settings, {Tab} from "Components/settings/Settings";
+import settings, {Tab} from "Components/Settings/Settings";
 import useSettings from "Hooks/UseSettings";
 
 const LegendComponent: React.FC = () => {
@@ -33,7 +33,7 @@ const LegendComponent: React.FC = () => {
                     </ul>
 
                     <i>
-                        <strong>Note:</strong> the paper is mostly focused on single-bounce indirect illumination, and so is this application. Refer to section "5.5 Path Guiding for Further Bounces" in the paper for how the authors suggest to extent it.
+                        <strong>Note:</strong> the paper is mostly focused on single-bounce indirect illumination, and so is this application. Please refer to section "5.5 Path Guiding for Further Bounces" in the paper for how the authors suggest to extent it.
                     </i>
                     <br/>
                 </div>
@@ -42,7 +42,10 @@ const LegendComponent: React.FC = () => {
                 return (
                     <div className="box">
                         <h2>Scene:</h2>
-                        In this visualisation tool, the scene is built using axis aligned bounding boxes.
+                        In this visualisation tool, the scene is a set of 2D-AABBs, a camera and a single light source. The original paper focuses on 3D-triangle meshes.
+                        <br/>
+                        <br/>
+                        For each pixel in the camera's texture, we shoot out a ray into the scene. We call the closest ray-scene intersection a shading point.
                     </div>
                 );
             case Tab.Clustering:
@@ -118,12 +121,10 @@ ray
                 return (
                     <div>
                         <div className="box">
-                            <h2>Intra-Voxel Sampling</h2>
+                            <h2>Path Guiding</h2>
                             <h3>5.3 Intra-Voxel Sampling</h3>
                             Selected voxels can be used to directly guide the path-tracing algorithm!
-                            From a shading point, we shoot a ray towards any point on the voxel. From
-
-
+                            From a shading point, we sample a ray towards the selected voxel. This means that the ray is more likely to hit a lit part of the scene compared to using a random BSDF-ray.
                         </div>
                     </div>
                 );

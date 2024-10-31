@@ -1,5 +1,5 @@
 import {RenderCall} from "Components/Scene/RenderCall";
-import {Color} from "Components/Scene/Color";
+import {Color} from "Components/Util/Color";
 
 export class Vector2 {
     x: number;

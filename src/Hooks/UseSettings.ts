@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import settings from 'Components/settings/Settings';
+import settings from 'Components/Settings/Settings';
 
 const useSettings = () => {
     const [values, setValues] = useState({ ...settings });
@@ -10,7 +10,7 @@ const useSettings = () => {
             setValues({ ...newSettings });
         };
 
-        // Subscribing to all changes from settings
+        // Subscribing to all changes from Settings
         settings.on('change', updateValues);
 
         return () => {

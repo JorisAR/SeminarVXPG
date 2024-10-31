@@ -1,9 +1,10 @@
-import {Color} from "Components/Scene/Color";
+import {Color} from "Components/Util/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
 import {VoxelGrid} from "Components/Scene/VoxelGrid";
 import {ShadingPoint} from "Components/Scene/ShadingPoint";
-import {Rect} from "Components/Scene/Rect";
-import {Vector2} from "Components/Scene/Vector2";
+import {Rect} from "Components/Util/Rect";
+import {Vector2} from "Components/Util/Vector2";
+import settings from "Components/Settings/Settings";
 
 export class ShadingPointCluster {
     private shadingPoints: ShadingPoint[] = []
@@ -50,9 +51,7 @@ export class ShadingPointCluster {
                 const to = voxel.rect.getCenter();
                 const from = shadingPoint.position;
                 const dir = to.subtract(from).normalize();
-                const hit = voxelGrid.raycast(from, dir);
-
-
+                const hit = settings.scene.raycast(from, dir);
 
                 if (hit !== undefined && voxel.rect.containsPoint(hit.point)) { //hit.point.distanceTo(to) < 0.01
                     const factor = to.inverseSquareLawFactor(from)
@@ -96,9 +95,9 @@ export class ShadingPointCluster {
         });
     }
 
-    public pathTrace(voxelGrid: VoxelGrid): void {
+    public pathTrace(): void {
         this.shadingPoints.forEach((shadingPoint) => {
-            shadingPoint.setIrradiance(shadingPoint.pathTrace(voxelGrid));
+            shadingPoint.setIrradiance(shadingPoint.pathTrace());
         });
     }
 

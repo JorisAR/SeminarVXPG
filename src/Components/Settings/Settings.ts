@@ -16,7 +16,7 @@ class Settings extends EventEmitter {
 
     //Scene
     public scenes: Scene[]  = Scene.getPredefinedScenes();
-    public currentScene: Scene  = this.scenes[0];
+    public scene: Scene  = this.scenes[0];
 
     public sceneScale: number = 2.0;
     public cameraFov : number = 90;
@@ -78,7 +78,7 @@ class Settings extends EventEmitter {
     }
 
     setScene(scene: Scene) {
-        this.currentScene = scene;
+        this.scene = scene;
         this.emit('sceneChange', scene);
         this.emit('change', this);
     }
@@ -128,6 +128,7 @@ class Settings extends EventEmitter {
         return this._showVoxelClusters;
     }
     get drawVoxels(): boolean {
+        if(this.selectedTab === Tab.Scene) return false;
         if(this.selectedTab !== Tab.Clustering) return true;
         return this._drawVoxels;
     }
@@ -138,7 +139,7 @@ class Settings extends EventEmitter {
 
     get drawShadingPoints(): boolean {
         if(this.selectedTab !== Tab.Clustering)
-            return this.selectedTab === Tab.Throughput || this.selectedTab === Tab.VoxelSampling ;
+            return this.selectedTab === Tab.Throughput || this.selectedTab === Tab.VoxelSampling || this.selectedTab === Tab.Scene;
         return this._drawShadingPoints;
     }
 

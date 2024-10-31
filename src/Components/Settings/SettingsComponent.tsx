@@ -1,28 +1,69 @@
-// src/Components/settings/PipelineTabs.tsx
+// src/Components/Settings/PipelineTabs.tsx
 import React from 'react';
-import 'Components/settings/Settings.css';
-import settings, {Tab} from 'Components/settings/Settings';
+import 'Components/Settings/Settings.css';
+import settings, {Tab} from 'Components/Settings/Settings';
 import useSettings from 'Hooks/UseSettings';
 import Statistics from "Components/Statistics/Statistics";
 import UseStatistics from "Hooks/UseStatistics";
-import Settings from "Components/settings/Settings";
+import Settings from "Components/Settings/Settings";
+import {SceneObject} from "Components/Scene/SceneObject";
+import {Vector2} from "Components/Util/Vector2";
+import {Color} from "Components/Util/Color";
 
 const SettingsComponent: React.FC = () => {
     useSettings();
     UseStatistics();
+
+    const handleAddObject = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const { value } = event.target;
+        switch (value) {
+            case "cube":
+                settings.scene.addObject(
+                    SceneObject.CreateSquare(new Vector2(0.50, 0.50)).SetColor(Color.CreateRandomSaturated())
+                );
+                break;
+            case "horizontal_wall":
+                settings.scene.addObject(
+                    SceneObject.CreateSquare(new Vector2(1.50, 0.15)).SetColor(Color.CreateRandomSaturated())
+                );
+                break;
+            case "vertical_wall":
+                settings.scene.addObject(
+                    SceneObject.CreateSquare(new Vector2(0.15, 1.50)).SetColor(Color.CreateRandomSaturated())
+                );
+                break;
+            case "table":
+                settings.scene.addObject(
+                    SceneObject.CreateTable(new Vector2(1,0.8)).SetColor(Color.CreateRandomSaturated())
+                );
+                break;
+            default:
+                break;
+        }
+        event.target.value = "default"; // Reset dropdown value
+    };
+
 
     const renderContent = () => {
         switch (settings.selectedTab) {
             case Tab.Scene:
                 return (
                     <div>
-                        {/*<strong>Note:</strong> Changing these settings resets the scene. <br/><br/>*/}
+                        {/*<strong>Note:</strong> Changing these Settings resets the scene. <br/><br/>*/}
                         <div>
                             {settings.getScenes().map((scene, index) => (
                                 <button key={index} onClick={() => settings.setScene(scene)}>
                                     Select Scene {index + 1}
                                 </button>
                             ))}
+
+                            <select onChange={handleAddObject} value="default">
+                                <option value="default" disabled>Click to add an object</option>
+                                <option value="cube">Cube</option>
+                                <option value="horizontal_wall">Horizontal Wall</option>
+                                <option value="vertical_wall">Vertical Wall</option>
+                                <option value="table">Table</option>
+                            </select>
                         </div>
 
                         <br/>
@@ -36,7 +77,11 @@ const SettingsComponent: React.FC = () => {
                                 value={settings.cameraFov}
                                 onChange={(e) => settings.setCameraFoV(Number(e.target.value))}
                             />
-                        </label>
+                        </label><br/>
+
+                        <strong>Left-Click and Drag</strong> to move objects in the scene.
+                        <br/>
+                        <strong>Right-Click</strong> to remove an object from the scene.
                     </div>
                 );
             case Tab.Clustering:
@@ -82,7 +127,7 @@ const SettingsComponent: React.FC = () => {
                 return (
                     <div>
                         <label>
-                            {/*{`Raycount: ${settings.}}}<br/>*/}
+                            {/*{`Raycount: ${Settings.}}}<br/>*/}
                             {settings.visibleRayCount <= 0 ? "Show All Rays" :
                                 "Amount of Visible Rays: " + settings.visibleRayCount.toString()}<br/>
                             <input
@@ -118,11 +163,10 @@ const SettingsComponent: React.FC = () => {
             case Tab.Throughput:
                 return (
                     <div>
-                        <strong>Note:</strong> Shading points display the irradiance directly sampled from the selected voxel.
+                        <i><strong>Note:</strong> Shading points display the irradiance directly sampled from the selected voxel.</i>
                         <br/>
                         <br/>
                         <strong>Hover</strong> over any shading point cluster to see the throughput between each voxel cluster.
-                        <br/>
                         <br/>
                         <strong>Click</strong> on a shading point to sample a voxel.
                     </div>
@@ -130,7 +174,7 @@ const SettingsComponent: React.FC = () => {
             case Tab.VoxelSampling:
                 return <div>
                     <button onClick={() => settings.recomputeGI()}>Recompute Path-Tracing</button>
-                    <button onClick={() => settings.toggleForcePT()}>{settings.voxelSamplingForcePT ? "Force Path-Tracing: On" : "Force Path-Tracing: Off"}</button><br/>
+                    <button onClick={() => settings.toggleForcePT()}>{settings.voxelSamplingForcePT ? "Path-Guiding: Off" : "Path-Guiding: On"}</button><br/>
                     <button onClick={() => settings.togglePrettyRenderer()}>{settings.voxelSamplingPrettyRenderer ? "RenderMode: pretty" : "RenderMode: visualisation"}</button>
                     <button onClick={() => settings.toggleShowArrows()}>{settings.voxelSamplingShowArrows ? "Show Arrows: On" : "Show Arrows: Off"}</button><br/>
                     {settings.voxelSamplingShowArrows &&
@@ -189,7 +233,7 @@ const SettingsComponent: React.FC = () => {
                 <button onClick={() => settings.setSelectedTab(Tab.LightInjection)} className={settings.selectedTab === Tab.LightInjection ? "selected" : ""}>Light Injection</button>
                 <button onClick={() => settings.setSelectedTab(Tab.Clustering)} className={settings.selectedTab === Tab.Clustering ? "selected" : ""}>Clustering</button>
                 <button onClick={() => settings.setSelectedTab(Tab.Throughput)} className={settings.selectedTab === Tab.Throughput ? "selected" : ""}>Throughput & Voxel Selection</button>
-                <button onClick={() => settings.setSelectedTab(Tab.VoxelSampling)} className={settings.selectedTab === Tab.VoxelSampling ? "selected" : ""}>Intra-Voxel Sampling</button>
+                <button onClick={() => settings.setSelectedTab(Tab.VoxelSampling)} className={settings.selectedTab === Tab.VoxelSampling ? "selected" : ""}>Path Guiding</button>
                 <div className="highlight-bar"></div>
             </div>
             <div className="box">

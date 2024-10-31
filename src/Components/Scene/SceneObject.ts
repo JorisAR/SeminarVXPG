@@ -1,15 +1,14 @@
-import p5 from 'p5';
-import {Rect} from "../Scene/Rect";
-import {Vector2} from "../Scene/Vector2";
-import {Scene} from "../Scene/Scene";
-import {Color} from "Components/Scene/Color";
+import {Rect} from "Components/Util/Rect";
+import {Vector2} from "Components/Util/Vector2";
+import {Color} from "Components/Util/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
-import Settings from "Components/settings/Settings";
 
 export class SceneObject {
     public position : Vector2 = new Vector2(0,0);
+    public static : boolean = false; //if true, cannot be moved
+    public bounds: Rect;
     constructor(private rects: Rect[], private size : Vector2) {
-
+        this.bounds = Rect.UnionRects(rects);
     }
 
     public getColliders() : Rect[] {
@@ -22,11 +21,16 @@ export class SceneObject {
         });
     }
 
-    //I should use factory/builder pattern but this works
+    public getCenter(): Vector2 {
+        return this.bounds.getCenter();
+    }
+
+    //--------------------- I should use factory/builder pattern but this works ---------------------------
     public SetCenter(center: Vector2) : SceneObject {
         let newPos = center.subtract(this.size.divide(2));
         let difference = newPos.subtract(this.position);
         this.rects.forEach(function(x) {x.position = x.position.add(difference)})
+        this.bounds.position = this.bounds.position.add(difference);
 
         this.position = newPos;
 
@@ -38,8 +42,12 @@ export class SceneObject {
         {
             x.stroke = color;
             x.fill = color;
-        })
+        });
+        return this;
+    }
 
+    public SetStatic(value: boolean) : SceneObject {
+        this.static = value;
         return this;
     }
 
@@ -65,14 +73,7 @@ export class SceneObject {
             new Rect(new Vector2(0, size.y - width), new Vector2(size.x, width)),
             new Rect(new Vector2(0, 0), new Vector2(width, size.y)),
             new Rect(new Vector2(size.x - width, 0), new Vector2(width, size.y)),
-        ], size);
-    }
-
-
-    applyScale(difference: Vector2) {
-        this.rects.forEach(function (rect) {
-            rect.applyScale(difference);
-        });
+        ], size).SetStatic(true);
     }
 }
 

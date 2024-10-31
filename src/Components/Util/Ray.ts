@@ -1,6 +1,6 @@
 import p5 from "p5";
-import {Color} from "../Scene/Color";
-import {Vector2} from "../Scene/Vector2";
+import {Color} from "Components/Util/Color";
+import {Vector2} from "Components/Util/Vector2";
 import {RenderCall} from "Components/Scene/RenderCall";
 
 

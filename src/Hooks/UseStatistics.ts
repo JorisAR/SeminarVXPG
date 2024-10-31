@@ -10,7 +10,7 @@ const useSettings = () => {
             setValues({ ...newSettings });
         };
 
-        // Subscribing to all changes from settings
+        // Subscribing to all changes from Settings
         statistics.on('change', updateValues);
 
         return () => {

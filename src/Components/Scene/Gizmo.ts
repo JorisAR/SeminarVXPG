@@ -1,5 +1,5 @@
 import p5 from "p5";
-import {Vector2} from "../Scene/Vector2";
+import {Vector2} from "Components/Util/Vector2";
 import {Scene} from "Components/Scene/Scene";
 import {RenderCall} from "Components/Scene/RenderCall";
 

@@ -1,9 +1,11 @@
 import p5 from "p5";
-import {Color} from "../Scene/Color";
-import {Vector2} from "../Scene/Vector2";
+import {Color} from "Components/Util/Color";
+import {Vector2} from "Components/Util/Vector2";
 import {RenderCall} from "Components/Scene/RenderCall";
 
 export class Rect {
+    static Empty = new Rect(Vector2.Zero, Vector2.Zero);
+
     constructor(public position: Vector2,
                 public  size: Vector2,
                 public  fill: Color = new Color(150, 150, 150, 255),
@@ -124,5 +126,13 @@ export class Rect {
             );
     }
 
+    public getRandomPointWithin(): Vector2 {
+        return this.position.add(this.size.multiplyV(new Vector2(Math.random(), Math.random())));
+    }
 
+
+    static UnionRects(rects: Rect[]) : Rect {
+        if(rects.length <= 0) return Rect.Empty;
+        return rects.reduce((sum, x) => sum.union(x), rects[0]);
+    }
 }

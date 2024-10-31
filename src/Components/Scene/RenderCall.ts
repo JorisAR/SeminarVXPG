@@ -1,4 +1,4 @@
-import {Vector2} from "Components/Scene/Vector2";
+import {Vector2} from "Components/Util/Vector2";
 import p5 from "p5";
 import {ShadingPointCluster} from "Components/Scene/ShadingPointCluster";
 import {ShadingPoint} from "Components/Scene/ShadingPoint";

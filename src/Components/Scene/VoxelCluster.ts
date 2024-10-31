@@ -1,7 +1,7 @@
-import {Rect} from "Components/Scene/Rect";
-import {Color} from "Components/Scene/Color";
+import {Rect} from "Components/Util/Rect";
+import {Color} from "Components/Util/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
-import {Vector2} from "Components/Scene/Vector2";
+import {Vector2} from "Components/Util/Vector2";
 import {Voxel} from "Components/Scene/Voxel";
 
 export class VoxelCluster {

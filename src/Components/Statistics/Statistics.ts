@@ -2,11 +2,13 @@ import { EventEmitter } from 'events';
 
 class Statistics extends EventEmitter {
 
-
     private _injectionRayCount : number = 0;
     private _voxelCount : number = 0;
     private _shadingPointCount : number = 0;
     private _pathTracingHitCount : number = 0;
+
+    private _superPixelCount: number = 0;
+    private _superVoxelCount: number = 0;
 
     get injectionRayCount(): number {
         return this._injectionRayCount;
@@ -27,6 +29,23 @@ class Statistics extends EventEmitter {
     }
     get shadingPointCount(): number {
         return this._shadingPointCount;
+    }
+
+    get superPixelCount(): number {
+        return this._superPixelCount;
+    }
+
+    set superPixelCount(value: number) {
+        this._superPixelCount = value;
+        this.emit('change', this);
+    }
+    get superVoxelCount(): number {
+        return this._superVoxelCount;
+    }
+
+    set superVoxelCount(value: number) {
+        this._superVoxelCount = value;
+        this.emit('change', this);
     }
 
     set shadingPointCount(value: number) {

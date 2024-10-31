@@ -1,13 +1,18 @@
 // src/Components/Scene/Scene.ts
 import p5 from 'p5';
-import {Rect} from "../Scene/Rect";
+import {Rect} from "Components/Util/Rect";
 import {SceneObject} from "../Scene/SceneObject";
-import {Vector2} from "../Scene/Vector2";
+import {Vector2} from "Components/Util/Vector2";
 import {Camera, Light} from "Components/Scene/Gizmo";
-import {Color} from "Components/Scene/Color";
+import {Color} from "Components/Util/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
 import {VoxelGrid} from "Components/Scene/VoxelGrid";
-import Settings from "Components/settings/Settings";
+import Settings from "Components/Settings/Settings";
+
+interface RaycastHit    {
+    point: Vector2;
+    normal: Vector2;
+}
 
 export class Scene {
     constructor(private size : Vector2, private objects : SceneObject[], public camera : Camera, public light : Light) {
@@ -33,10 +38,18 @@ export class Scene {
         return this.size;
     }
 
-    public sampleLight(point: Vector2, voxelGrid: VoxelGrid): number | null {
+    public removeObject(object : SceneObject): void {
+        this.objects = this.objects.filter(x => x !== object);
+    }
+
+    public addObject(object : SceneObject): void {
+        this.objects.push(object);
+    }
+
+    public sampleLight(point: Vector2): number | null {
         const from = this.light.getPosition();
         const dir = point.subtract(from).normalize();
-        const hit = voxelGrid.raycast(from, dir);
+        const hit = this.raycast(from, dir);
         if (hit && point.distanceTo(hit.point) < 0.01) {
             return this.light.brightnessAt(point);
         }
@@ -63,5 +76,60 @@ export class Scene {
             Light.Create(new Vector2(6 * 0.9, 3 * 0.25), 10));
 
         return [dinnerTableScene, occludedLightScene];
+    }
+
+    public getSceneObjectAt(position: Vector2) : SceneObject | undefined {
+        for (let i = this.objects.length - 1; i >= 0; i--){
+            const object = this.objects[i];
+            if(!object.static && object.bounds.containsPoint(position)) {
+                return object;
+            }
+        }
+        return undefined;
+    }
+
+    public raycast(from: Vector2, dir: Vector2): RaycastHit | undefined {
+        let closestHit: RaycastHit | undefined = undefined;
+        let minDistance = Infinity;
+
+        for (const rect of this.getGeometry()) {
+            const hit = Scene.raycastRect(from, dir, rect);
+            if (hit) {
+                const distance = from.subtract(hit.point).length();
+                //if normal dot dir >= 0 and dist low, then we discard the hit, as from is likely on the edge of the hit object.
+                if (distance < minDistance && !(hit.normal.dot(dir) >= 0 && distance < 0.001)) {
+                    minDistance = distance;
+                    closestHit = hit;
+                }
+            }
+        }
+
+        return closestHit;
+    }
+
+    private static raycastRect(from: Vector2, dir: Vector2, rect: Rect): RaycastHit | undefined {
+        const eps = 0.00001
+        const invDir = new Vector2(1 / (eps + dir.x), 1 / (eps + dir.y));
+
+        const t1 = (rect.position.x - from.x) * invDir.x;
+        const t2 = (rect.position.x + rect.size.x - from.x) * invDir.x;
+        const t3 = (rect.position.y - from.y) * invDir.y;
+        const t4 = (rect.position.y + rect.size.y - from.y) * invDir.y;
+
+        const tmin = Math.max(Math.min(t1, t2), Math.min(t3, t4));
+        const tmax = Math.min(Math.max(t1, t2), Math.max(t3, t4));
+
+        if (tmax < 0 || tmin > tmax) {
+            return undefined;
+        }
+
+        const t = tmin < 0 ? tmax : tmin;
+        const point = from.add(dir.multiply(t));
+        const normal = new Vector2(
+            t === t1 ? -1 : t === t2 ? 1 : 0,
+            t === t3 ? -1 : t === t4 ? 1 : 0
+        );
+
+        return { point, normal };
     }
 }
