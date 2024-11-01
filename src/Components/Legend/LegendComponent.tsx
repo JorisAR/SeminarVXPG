@@ -16,7 +16,7 @@ const LegendComponent: React.FC = () => {
                     <h2>Paper Overview:</h2>
                     <h3>4 Overview</h3>
                     <strong>
-                        An unofficial educational visualization tool for the <a href={"https://suikasibyl.github.io/vxpg"} color={"white"}>VXPG paper</a>, by Lu et. al.
+                        An educational visualization tool for the <a href={"https://suikasibyl.github.io/vxpg"} color={"white"}>VXPG paper</a>, by Lu et. al.
                     </strong>
                     <br/>
                     <br/>
