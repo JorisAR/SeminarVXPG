@@ -18,8 +18,7 @@ class Settings extends EventEmitter {
     public scenes: Scene[]  = Scene.getPredefinedScenes();
     public scene: Scene  = this.scenes[0];
 
-    public sceneScale: number = 2.0;
-    public cameraFov : number = 90;
+    //public cameraFov : number = 90;
 
     //Geometry Injection
     public tightBounds: boolean = false;
@@ -27,7 +26,7 @@ class Settings extends EventEmitter {
 
     //Light Injection
     simulationSpeed: number  = 20;
-    visibleRayCount: number  = 15;
+    visibleRayCount: number  = 1000;
     simulationActive: boolean  = false;
 
     //Clustering
@@ -41,10 +40,19 @@ class Settings extends EventEmitter {
     public voxelSamplingSPFrequency = 10; //one in n samplingpoints are rendered
     public voxelSamplingForcePT = false;
     private _voxelSamplingPrettyRenderer = false;
+    private _voxelSamplingBinaryColor = false;
 
 
     constructor() {
         super();
+    }
+
+    public forceGridChange() {
+        this.emit('forceGridChange', this);
+    }
+
+    public forceChange() {
+        this.emit('change', this);
     }
 
     //======================================== Tabs ========================================
@@ -71,11 +79,11 @@ class Settings extends EventEmitter {
         this.emit('injectGeometry', this);
     }
 
-    setCameraFoV(fov: number) {
-        this.cameraFov = fov;
-        this.emit('fovChange', fov);
-        this.emit('change', this);
-    }
+    // setCameraFoV(fov: number) {
+    //     this.cameraFov = fov;
+    //     this.emit('fovChange', fov);
+    //     this.emit('change', this);
+    // }
 
     setScene(scene: Scene) {
         this.scene = scene;
@@ -85,12 +93,6 @@ class Settings extends EventEmitter {
 
     getScenes(): Scene[] {
         return this.scenes;
-    }
-
-    setSceneScale(scale: number) {
-        this.sceneScale = scale;
-        this.emit('scaleChange', scale);
-        this.emit('change', this);
     }
 
     //======================================== light injection ========================================
@@ -129,7 +131,7 @@ class Settings extends EventEmitter {
     }
     get drawVoxels(): boolean {
         if(this.selectedTab === Tab.Scene) return false;
-        if(this.selectedTab !== Tab.Clustering) return true;
+        if(this.selectedTab !== Tab.Clustering && this.selectedTab !== Tab.VoxelSampling) return true;
         return this._drawVoxels;
     }
     get showShadingPointClusters(): boolean {
@@ -143,29 +145,36 @@ class Settings extends EventEmitter {
         return this._drawShadingPoints;
     }
 
-    setShowVoxelClusters(checked: boolean) {
+    set showVoxelClusters(checked: boolean) {
         this._showVoxelClusters = checked;
         this.emit('change', this);
     }
 
-    setShowShadingPointClusters(checked: boolean) {
+    set showShadingPointClusters(checked: boolean) {
         this._showShadingPointClusters = checked;
         this.emit('change', this);
     }
 
-    setDrawShadingPoints(checked: boolean) {
+    set drawShadingPoints(checked: boolean) {
         this._drawShadingPoints = checked;
         this.emit('change', this);
     }
 
-    setDrawVoxels(checked: boolean) {
+    set drawVoxels(checked: boolean) {
         this._drawVoxels = checked;
         this.emit('change', this);
     }
 
+    public toggleDrawVoxels() {
+        this.drawVoxels = !this.drawVoxels;
+        this.emit('change', this);
+    }
+
+
+
     //======================================== voxel sampling ========================================
 
-    toggleForcePT() {
+    public toggleForcePT() {
         this.voxelSamplingForcePT = !this.voxelSamplingForcePT;
         this.emit('change', this);
         this.recomputeGI()
@@ -174,6 +183,10 @@ class Settings extends EventEmitter {
     toggleShowArrows() {
         this.voxelSamplingShowArrows = !this.voxelSamplingShowArrows;
         this.emit('change', this);
+    }
+
+    toggleBinaryColors() {
+        this.voxelSamplingBinaryColor = !this.voxelSamplingBinaryColor;
     }
 
     setVisibleArrowCount(count: number) {
@@ -188,12 +201,21 @@ class Settings extends EventEmitter {
     togglePrettyRenderer() {
         this._voxelSamplingPrettyRenderer = !this._voxelSamplingPrettyRenderer;
         this.emit('change', this);
-        this.emit('setPrettyRenderer');
     }
 
     get voxelSamplingPrettyRenderer(): boolean {
         if(this.selectedTab !== Tab.VoxelSampling) return false;
         return this._voxelSamplingPrettyRenderer;
+    }
+
+    get voxelSamplingBinaryColor(): boolean {
+        if(this.selectedTab !== Tab.VoxelSampling) return false;
+        return this._voxelSamplingBinaryColor;
+    }
+
+    set voxelSamplingBinaryColor(value: boolean) {
+        this._voxelSamplingBinaryColor = value;
+        this.emit('change', this);
     }
 }
 export default new Settings();

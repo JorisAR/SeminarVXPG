@@ -4,6 +4,9 @@ export class Color {
     public b: number;
     public a: number;
 
+    static White = new Color(255, 255, 255, 255);
+    static Black = new Color(0, 0, 0, 255);
+
     constructor(r: number, g: number, b: number, a: number);
     constructor(gray: number);
     constructor(rOrGray: number, g?: number, b?: number, a: number = 255.0) {

@@ -1,6 +1,6 @@
 # Educational Visualisation of VXPG
 
-An educational tool to explain the contributions of "Real-Time Path Guiding Using Bounding Voxel Sampling" by Lu et. al.
+An unofficial educational tool to explain the contributions of "Real-Time Path Guiding Using Bounding Voxel Sampling" by Lu et. al.
 I have developed this as part of the Computer Graphics seminar.
 
 It is hosted at: https://jorisar.github.io/SeminarVXPG/

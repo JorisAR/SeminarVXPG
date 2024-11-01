@@ -8,7 +8,7 @@ import {RenderCall} from 'Components/Scene/RenderCall';
 import {ShadingPointCluster} from "Components/Scene/ShadingPointCluster";
 import {ShadingPoint} from "Components/Scene/ShadingPoint";
 import {Color} from "Components/Util/Color";
-import {SceneObject} from "Components/Scene/SceneObject";
+import {SceneObject} from "Components/Scene/Objects/SceneObject";
 
 export class SceneRenderer {
     public p5Instance: p5;
@@ -23,7 +23,6 @@ export class SceneRenderer {
 
     constructor(canvasRef: HTMLDivElement, scene: Scene) {
         this.canvasRef = canvasRef;
-        settings.scene.camera.fov = settings.cameraFov;
         this.voxelGrid = new VoxelGrid(settings.scene.getSize(), settings.voxelSize);
 
         this.p5Instance = new p5((p: p5) => {
@@ -43,7 +42,6 @@ export class SceneRenderer {
                 // ---------------------------- rendering ----------------------------
 
                 Settings.voxelSamplingPrettyRenderer ? p.background(5) : p.background(50);
-
 
                 const renderCall: RenderCall = {
                     p: p,
@@ -141,8 +139,7 @@ export class SceneRenderer {
         return position.divideV(this.scale);
     }
 
-    public UpdateFoV() : void {
-        settings.scene.camera.fov = settings.cameraFov;
+    public UpdateGrid() : void {
         this.UpdateVoxelGridSize();
     }
 

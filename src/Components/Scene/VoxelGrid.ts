@@ -13,11 +13,11 @@ import Statistics from "Components/Statistics/Statistics";
 import statistics from "Components/Statistics/Statistics";
 
 export class VoxelGrid {
-   // private voxels : Voxel[] = [];
-    public voxelClusters : VoxelCluster[] = [];
-    private paths : Path[] = [];
-    private cameraFrustum : Ray[] = [];
-    private shadingPointClusters : ShadingPointCluster[] = [];
+    // private voxels : Voxel[] = [];
+    public voxelClusters: VoxelCluster[] = [];
+    private paths: Path[] = [];
+    private cameraFrustum: Ray[] = [];
+    private shadingPointClusters: ShadingPointCluster[] = [];
     public drawRays = true;
     //private geometry: Rect[];
     private clusterSize: number = 0;
@@ -51,8 +51,8 @@ export class VoxelGrid {
                 let rect = new Rect(new Vector2(x, y), new Vector2(voxelSize, voxelSize), fillColor, strokeColor);
                 for (const other of geometry) {
                     if (rect.collides(other)) {
-                        for(const cluster of this.voxelClusters) {
-                            if (cluster.rect.containsPoint(new Vector2(x , y))) {
+                        for (const cluster of this.voxelClusters) {
+                            if (cluster.rect.containsPoint(new Vector2(x, y))) {
                                 cluster.addVoxel(new Voxel(rect));
                                 Statistics.voxelCount += 1;
                                 break;
@@ -74,24 +74,24 @@ export class VoxelGrid {
         count = Math.max(2, count);
         const clusterCount = 10;
         Statistics.superPixelCount = clusterCount;
-        for(let i = 0; i < clusterCount; i++) {
+        for (let i = 0; i < clusterCount; i++) {
             this.shadingPointClusters.push(new ShadingPointCluster(Color.CreateRandomSaturated(255)))
         }
 
         this.clusterSize = count / clusterCount;
 
-        for(let i = 0; i < count; i++) {
+        for (let i = 0; i < count; i++) {
             const clusterIndex = Math.floor(i / this.clusterSize);
 
             let from = settings.scene.camera.getPosition();
             let dir = settings.scene.camera.getRayDirection(i / (count - 1));
             let hit = settings.scene.raycast(from, dir);
 
-            if(hit) {
+            if (hit) {
                 const color = new Color(0, 0, 0, 255);
                 this.shadingPointClusters[clusterIndex].addShadingPoint(new ShadingPoint(hit.point, hit.normal, color));
                 Statistics.shadingPointCount += 1;
-                if(i === 0 || i === count - 1) {
+                if (i === 0 || i === count - 1) {
                     this.cameraFrustum.push(new Ray(from, hit.point, new Color(255, 255, 255, 255)))
                 }
             }
@@ -99,7 +99,7 @@ export class VoxelGrid {
     }
 
     public computeGI() {
-        const voxelGrid : VoxelGrid = this;
+        const voxelGrid: VoxelGrid = this;
         Statistics.pathTracingHitCount = 0;
         this.shadingPointClusters.forEach(function (cluster) {
             cluster.computeThroughput(voxelGrid);
@@ -113,7 +113,6 @@ export class VoxelGrid {
         rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
         rays.push(new Ray(a2, b2, new Color(0, 0, 255, 255)));
         this.paths.push(new Path(rays, this.paths.length));
-        this.computeGI();
     }
 
     public addMissedPath(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2) {
@@ -121,8 +120,6 @@ export class VoxelGrid {
         rays.push(new Ray(a1, b1, new Color(255, 0, 0, 255)));
         rays.push(new Ray(a2, b2, new Color(5, 15, 5, 255)));
         this.paths.push(new Path(rays, this.paths.length));
-
-        this.computeGI();
     }
 
     public addFullPath(a1: Vector2, b1: Vector2, a2: Vector2, b2: Vector2, a3: Vector2, b3: Vector2) {
@@ -131,20 +128,18 @@ export class VoxelGrid {
         rays.push(new Ray(a2, b2, new Color(0, 255, 0, 255)));
         rays.push(new Ray(a3, b3, new Color(0, 0, 255, 255)));
         this.paths.push(new Path(rays, this.paths.length));
-
-        this.computeGI();
     }
 
 
-    public draw(renderCall: RenderCall) : void {
-        if(this.drawRays) {
-            const rayCount : number = this.paths.length - 1;
+    public draw(renderCall: RenderCall): void {
+        if (this.drawRays) {
+            const rayCount: number = this.paths.length - 1;
             this.paths.forEach(function (ray) {
                 ray.draw(renderCall, rayCount, settings.visibleRayCount);
             });
         }
 
-        if(settings.drawVoxels) {
+        if (settings.drawVoxels) {
             this.voxelClusters.forEach(function (cluster) {
                 cluster.draw(renderCall, settings.showVoxelClusters);
             });
@@ -155,10 +150,10 @@ export class VoxelGrid {
             ray.draw(renderCall, 2, -1, 0);
         });
 
-        if(settings.drawShadingPoints) {
+        if (settings.drawShadingPoints) {
             let i = 0;
             for (const cluster of this.shadingPointClusters) {
-                if(renderCall.selectedShadingCluster && renderCall.selectedShadingCluster !== cluster) continue;
+                if (renderCall.selectedShadingCluster && renderCall.selectedShadingCluster !== cluster) continue;
                 cluster.draw(renderCall, settings.showShadingPointClusters, i);
                 i += this.clusterSize;
                 //cluster.rect?.draw(renderCall, cluster.color);
@@ -169,8 +164,8 @@ export class VoxelGrid {
         }
     }
 
-    private getCollidingGeometry(collider: Rect, geometry: Rect[]) : Rect[] {
-        const result : Rect[] = [];
+    private getCollidingGeometry(collider: Rect, geometry: Rect[]): Rect[] {
+        const result: Rect[] = [];
         geometry.forEach(g => {
             g.collides(collider)
             result.push(g);
@@ -178,8 +173,8 @@ export class VoxelGrid {
         return result;
     }
 
-    public injectGeometry() : void {
-        if(!settings.tightBounds) return;
+    public injectGeometry(): void {
+        if (!settings.tightBounds) return;
 
         const geometry = settings.scene.getGeometry();
 
@@ -193,19 +188,19 @@ export class VoxelGrid {
         });
     }
 
-    public getShadingPointClusterAt(point: Vector2) : ShadingPointCluster | undefined {
+    public getShadingPointClusterAt(point: Vector2): ShadingPointCluster | undefined {
 
         for (const cluster of this.shadingPointClusters) {
-            if(cluster.rect?.containsPoint(point)) {
+            if (cluster.rect?.containsPoint(point)) {
                 return cluster;
             }
         }
         return undefined;
     }
 
-    public lightInjectionStep(dir? : Vector2): void {
+    public lightInjectionStep(dir?: Vector2, recomputeGI: boolean = true): void {
         let from = settings.scene.camera.getPosition();
-        if(!dir) dir = settings.scene.camera.getRandomRayDirection();
+        if (!dir) dir = settings.scene.camera.getRandomRayDirection();
         let hit = settings.scene.raycast(from, dir);
 
         statistics.injectionRayCount += 1;
@@ -221,6 +216,7 @@ export class VoxelGrid {
                 let voxel = this.getVoxelAt(x1);
                 if (voxel) {
                     voxel.inject(lightSample);
+                    if (recomputeGI) this.computeGI();
                 }
                 return;
             }
@@ -239,19 +235,21 @@ export class VoxelGrid {
                     if (voxel) {
                         voxel.inject(lightSample);
                     }
+                    if (recomputeGI) this.computeGI();
                 } else {
                     this.addMissedPath(camera, x1, x1, x2);
+                    if (recomputeGI) this.computeGI();
                 }
             }
         }
     }
 
-    public getVoxelAt(point: Vector2) : Voxel | undefined {
+    public getVoxelAt(point: Vector2): Voxel | undefined {
         for (const cluster of this.voxelClusters) {
             const voxel = cluster.tryGetVoxelAt(point);
-            if(voxel !== undefined) return voxel;
+            if (voxel !== undefined) return voxel;
         }
-        return  undefined;
+        return undefined;
     }
 
     resetRays() {

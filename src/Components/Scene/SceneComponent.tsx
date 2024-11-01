@@ -31,7 +31,7 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
                 canvasRef.current?.removeEventListener('contextmenu', handleContextMenu);
             };
         }
-    }, [scene]);
+    }, []);
 
     useEffect(() => {
         if (canvasRef.current && rendererRef.current) {
@@ -71,15 +71,18 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
             // Implement reset logic here
         };
         const handleShootLightInjectionRay = (count: number) => {
+            const grid = rendererRef.current?.voxelGrid;
+            if(!grid) return;
             for (let i = 0; i < count; i++) {
-                rendererRef.current?.voxelGrid.lightInjectionStep();
+                grid.lightInjectionStep(undefined, false);
             }
+            grid.computeGI();
         };
         const handleSceneChange = (scene: Scene) => {
             setScene(scene);
         };
-        const handleFoVChange = (fov: number) => {
-            rendererRef.current?.UpdateFoV();
+        const handleForceGridChange = (fov: number) => {
+            rendererRef.current?.UpdateGrid();
         };
         const handleInjectGeometry = (fov: number) => {
             rendererRef.current?.InjectGeometry();
@@ -91,16 +94,16 @@ const SceneComponent: React.FC<ScenePanelProps> = ({ settings }) => {
         settings.on('resetLightInjection', handleResetLightInjection);
         settings.on('shootLightInjectionRay', handleShootLightInjectionRay);
         settings.on('sceneChange', handleSceneChange);
-        settings.on('fovChange', handleFoVChange);
         settings.on('injectGeometry', handleInjectGeometry);
+        settings.on('forceGridChange', handleForceGridChange);
         settings.on('recomputeGI', handleRecomputeGI);
         return () => {
             settings.off('voxelSizeChange', handleVoxelSizeChange);
             settings.off('resetLightInjection', handleResetLightInjection);
             settings.off('shootLightInjectionRay', handleShootLightInjectionRay);
             settings.off('sceneChange', handleSceneChange);
-            settings.off('fovChange', handleFoVChange);
             settings.off('injectGeometry', handleInjectGeometry);
+            settings.off('forceGridChange', handleForceGridChange);
             settings.off('recomputeGI', handleRecomputeGI);
         };
     }, [settings, scene]);

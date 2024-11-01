@@ -7,6 +7,7 @@ import {VoxelGrid} from "Components/Scene/VoxelGrid";
 import Settings, {Tab} from "Components/Settings/Settings";
 import Statistics from "Components/Statistics/Statistics";
 import settings from "Components/Settings/Settings";
+import {inspect} from "util";
 
 export class ShadingPoint {
     private radius : number = 0.05;
@@ -34,6 +35,11 @@ export class ShadingPoint {
 
         if(Settings.selectedTab === Tab.VoxelSampling && Settings.voxelSamplingShowArrows && index % Settings.voxelSamplingSPFrequency === 0)
             this.pathTraceDir.drawArrow(settings, this.position.multiplyV(settings.scale));
+
+        if(Settings.voxelSamplingBinaryColor) {
+            console.log(color.getIntensity())
+            color = (color.getIntensity() > 0.01 ? Color.White : Color.Black)
+        }
 
         p.push();
         p.stroke(color.r, color.g, color.b, this.color.a * alpha);
@@ -75,7 +81,7 @@ export class ShadingPoint {
             lightSample = settings.scene.sampleLight(hit.point);
             if (lightSample) {
                 Statistics.pathTracingHitCount++;
-                return lightSample;
+                return lightSample * hit.point.inverseSquareLawFactor(this.position);
             }
         }
         return 0;

@@ -89,6 +89,15 @@ export class Vector2 {
         );
     }
 
+    static fromAngle(angle: number) : Vector2 {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return new Vector2(
+            cos,
+            sin
+        );
+    }
+
     // Randomly reflect this vector around a normal vector within ±90 degrees
     public randomReflection() {
         const angle = (Math.random() - 0.5) * Math.PI; // Random angle between -90 and 90 degrees
@@ -153,7 +162,4 @@ export class Vector2 {
 
 
     }
-
-
-
 }

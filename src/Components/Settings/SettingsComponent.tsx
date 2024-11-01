@@ -6,7 +6,7 @@ import useSettings from 'Hooks/UseSettings';
 import Statistics from "Components/Statistics/Statistics";
 import UseStatistics from "Hooks/UseStatistics";
 import Settings from "Components/Settings/Settings";
-import {SceneObject} from "Components/Scene/SceneObject";
+import {RectMesh} from "Components/Scene/Objects/RectMesh";
 import {Vector2} from "Components/Util/Vector2";
 import {Color} from "Components/Util/Color";
 
@@ -19,22 +19,22 @@ const SettingsComponent: React.FC = () => {
         switch (value) {
             case "cube":
                 settings.scene.addObject(
-                    SceneObject.CreateSquare(new Vector2(0.50, 0.50)).SetColor(Color.CreateRandomSaturated())
+                    RectMesh.CreateSquare(new Vector2(0.50, 0.50)).SetColor(Color.CreateRandomSaturated())
                 );
                 break;
             case "horizontal_wall":
                 settings.scene.addObject(
-                    SceneObject.CreateSquare(new Vector2(1.50, 0.15)).SetColor(Color.CreateRandomSaturated())
+                    RectMesh.CreateSquare(new Vector2(1.50, 0.15)).SetColor(Color.CreateRandomSaturated())
                 );
                 break;
             case "vertical_wall":
                 settings.scene.addObject(
-                    SceneObject.CreateSquare(new Vector2(0.15, 1.50)).SetColor(Color.CreateRandomSaturated())
+                    RectMesh.CreateSquare(new Vector2(0.15, 1.50)).SetColor(Color.CreateRandomSaturated())
                 );
                 break;
             case "table":
                 settings.scene.addObject(
-                    SceneObject.CreateTable(new Vector2(1,0.8)).SetColor(Color.CreateRandomSaturated())
+                    RectMesh.CreateTable(new Vector2(1,0.8)).SetColor(Color.CreateRandomSaturated())
                 );
                 break;
             default:
@@ -68,14 +68,31 @@ const SettingsComponent: React.FC = () => {
 
                         <br/>
                         <label>
-                            {"Camera Field Of View: " + (settings.cameraFov).toString()}<br/>
+                            {"Camera Field Of View: " + (settings.scene.camera.fov).toString()}<br/>
                             <input
                                 type="range"
                                 min="25"
                                 max="150"
                                 step = "5"
-                                value={settings.cameraFov}
-                                onChange={(e) => settings.setCameraFoV(Number(e.target.value))}
+                                value={settings.scene.camera.fov}
+                                onChange={(e) => {
+                                    settings.scene.camera.fov = Number(e.target.value);
+                                    settings.forceGridChange();
+                                }}
+                            />
+                        </label><br/>
+                        <label>
+                            {"Camera Rotation: " + (Math.round(settings.scene.camera.direction.angle() * 180 / Math.PI)).toString()}<br/>
+                            <input
+                                type="range"
+                                min="-180"
+                                max="180"
+                                step = "15"
+                                value={Math.round(settings.scene.camera.direction.angle() * 180 / Math.PI)}
+                                onChange={(e) => {
+                                    settings.scene.camera.setDirection(Number(e.target.value) / 180 * Math.PI);
+                                    settings.forceGridChange();
+                                }}
                             />
                         </label><br/>
 
@@ -92,7 +109,7 @@ const SettingsComponent: React.FC = () => {
                             <input
                                 type="checkbox"
                                 checked={settings.drawVoxels}
-                                onChange={(e) => settings.setDrawVoxels(e.target.checked)}
+                                onChange={(e) => settings.drawVoxels = e.target.checked}
                             />
                         </label><br/>
                         <label>
@@ -100,7 +117,7 @@ const SettingsComponent: React.FC = () => {
                             <input
                                 type="checkbox"
                                 checked={settings.showVoxelClusters}
-                                onChange={(e) => settings.setShowVoxelClusters(e.target.checked)}
+                                onChange={(e) => settings.showVoxelClusters = e.target.checked}
                             />
                         </label>
                         <br/>
@@ -110,7 +127,7 @@ const SettingsComponent: React.FC = () => {
                             <input
                                 type="checkbox"
                                 checked={settings.drawShadingPoints}
-                                onChange={(e) => settings.setDrawShadingPoints(e.target.checked)}
+                                onChange={(e) => settings.drawShadingPoints = e.target.checked}
                             />
                         </label><br />
                         <label>
@@ -118,7 +135,7 @@ const SettingsComponent: React.FC = () => {
                             <input
                                 type="checkbox"
                                 checked={settings.showShadingPointClusters}
-                                onChange={(e) => settings.setShowShadingPointClusters(e.target.checked)}
+                                onChange={(e) => settings.showShadingPointClusters = e.target.checked}
                             />
                         </label>
                     </div>
@@ -132,8 +149,9 @@ const SettingsComponent: React.FC = () => {
                                 "Amount of Visible Rays: " + settings.visibleRayCount.toString()}<br/>
                             <input
                                 type="range"
-                                min="0"
-                                max="500"
+                                min="-36"
+                                max="1000"
+                                step="37"
                                 value={settings.visibleRayCount}
                                 onChange={(e) => settings.setVisibleRayCount(Number(e.target.value))}
                             />
@@ -163,7 +181,7 @@ const SettingsComponent: React.FC = () => {
             case Tab.Throughput:
                 return (
                     <div>
-                        <i><strong>Note:</strong> Shading points display the irradiance directly sampled from the selected voxel.</i>
+                        <i><strong>Note:</strong> Shading points display the irradiance from from a sampled voxel.</i>
                         <br/>
                         <br/>
                         <strong>Hover</strong> over any shading point cluster to see the throughput between each voxel cluster.
@@ -174,9 +192,11 @@ const SettingsComponent: React.FC = () => {
             case Tab.VoxelSampling:
                 return <div>
                     <button onClick={() => settings.recomputeGI()}>Recompute Path-Tracing</button>
-                    <button onClick={() => settings.toggleForcePT()}>{settings.voxelSamplingForcePT ? "Path-Guiding: Off" : "Path-Guiding: On"}</button><br/>
-                    <button onClick={() => settings.togglePrettyRenderer()}>{settings.voxelSamplingPrettyRenderer ? "RenderMode: pretty" : "RenderMode: visualisation"}</button>
-                    <button onClick={() => settings.toggleShowArrows()}>{settings.voxelSamplingShowArrows ? "Show Arrows: On" : "Show Arrows: Off"}</button><br/>
+                    <button onClick={() => settings.toggleForcePT()}>{settings.voxelSamplingForcePT ? "Path-Guiding: Off" : "Path-Guiding: On"}</button>
+                    <button onClick={() => settings.togglePrettyRenderer()}>{settings.voxelSamplingPrettyRenderer ? "RenderMode: pretty" : "RenderMode: visualisation"}</button><br/>
+                    <button onClick={() => settings.toggleShowArrows()}>{settings.voxelSamplingShowArrows ? "Show Arrows: On" : "Show Arrows: Off"}</button>
+                    <button onClick={() => settings.toggleBinaryColors()}>{settings.voxelSamplingBinaryColor ? "Binary Colors: On" : "Binary Colors: Off"}</button>
+                    <button onClick={() => settings.toggleDrawVoxels()}>{settings.drawVoxels ? "Show Voxels: On" : "Show Voxels: Off"}</button><br/>
                     {settings.voxelSamplingShowArrows &&
                         <label>
                             {"Arrow Frequency: " + settings.voxelSamplingSPFrequency.toString()}<br/>

@@ -1,22 +1,22 @@
 // src/Components/Scene/Scene.ts
 import p5 from 'p5';
 import {Rect} from "Components/Util/Rect";
-import {SceneObject} from "../Scene/SceneObject";
+import {RectMesh} from "Components/Scene/Objects/RectMesh";
 import {Vector2} from "Components/Util/Vector2";
-import {Camera, Light} from "Components/Scene/Gizmo";
+import {SceneObject} from "Components/Scene/Objects/SceneObject";
 import {Color} from "Components/Util/Color";
 import {RenderCall} from "Components/Scene/RenderCall";
-import {VoxelGrid} from "Components/Scene/VoxelGrid";
-import Settings from "Components/Settings/Settings";
+import {Camera} from "Components/Scene/Objects/Camera";
+import {Light} from "Components/Scene/Objects/Light";
 
-interface RaycastHit    {
+interface RaycastHit {
     point: Vector2;
     normal: Vector2;
 }
 
 export class Scene {
-    constructor(private size : Vector2, private objects : SceneObject[], public camera : Camera, public light : Light) {
-        objects.push(SceneObject.CreateSceneBounds(size));
+    constructor(private size: Vector2, private objects: RectMesh[], public camera: Camera, public light: Light) {
+        objects.push(RectMesh.CreateSceneBounds(size));
     }
 
     public draw(settings: RenderCall, color: Color | undefined) {
@@ -34,15 +34,15 @@ export class Scene {
         return this.objects.flatMap(object => object.getColliders());
     }
 
-    public getSize() : Vector2 {
+    public getSize(): Vector2 {
         return this.size;
     }
 
-    public removeObject(object : SceneObject): void {
+    public removeObject(object: SceneObject): void {
         this.objects = this.objects.filter(x => x !== object);
     }
 
-    public addObject(object : SceneObject): void {
+    public addObject(object: RectMesh): void {
         this.objects.push(object);
     }
 
@@ -57,31 +57,49 @@ export class Scene {
     }
 
     public static getPredefinedScenes(): Scene[] {
-        const dinnerTableScene = new Scene(
-            new Vector2(6,3),
+        const scene1 = new Scene(
+            new Vector2(6, 3),
             [
-                SceneObject.CreateTable(new Vector2(1,0.8)).SetCenter(new Vector2(1.5,2.6)).SetColor(new Color(150, 75, 15, 255)),
-                SceneObject.CreateTable(new Vector2(.5,.5)).SetCenter(new Vector2(0.9,2.75)).SetColor(new Color(100, 40, 15, 255)),
-                SceneObject.CreateTable(new Vector2(.5,.5)).SetCenter(new Vector2(2.1,2.75)).SetColor(new Color(100, 40, 15, 255)),
+                RectMesh.CreateTable(new Vector2(1, 0.8)).SetCenter(new Vector2(3, 2.6)).SetColor(new Color(150, 75, 15, 255)),
+                RectMesh.CreateTable(new Vector2(.5, .5)).SetCenter(new Vector2(2, 2.75)).SetColor(new Color(100, 40, 15, 255)),
+                RectMesh.CreateTable(new Vector2(.5, .5)).SetCenter(new Vector2(4, 2.75)).SetColor(new Color(100, 40, 15, 255)),
             ],
             Camera.Create(new Vector2(6 * 0.2, 3 * 0.1), new Vector2(1, 1).normalize(), 90),
-            Light.Create(new Vector2(6 * 0.75, 3 * 0.25), 10));
+            Light.Create(new Vector2(4.6, 2.7), 25));
 
-        const occludedLightScene = new Scene(
-            new Vector2(6,3),
+        const scene2 = new Scene(
+            new Vector2(6, 3),
             [
-                SceneObject.CreateSquare(new Vector2(0.1,2)).SetCenter(new Vector2(4.5,1)).SetColor(new Color(150, 150, 150, 255)),
+                RectMesh.CreateSquare(new Vector2(0.1, 1.2)).SetCenter(new Vector2(4.5, .6)).SetColor(new Color(150, 150, 150, 255)),
             ],
             Camera.Create(new Vector2(6 * 0.2, 3 * 0.7), new Vector2(1, -1).normalize(), 90),
-            Light.Create(new Vector2(6 * 0.9, 3 * 0.25), 10));
+            Light.Create(new Vector2(6 * 0.875, 3 * 0.15), 25));
 
-        return [dinnerTableScene, occludedLightScene];
+        const scene3 = new Scene(
+            new Vector2(6, 3),
+            [
+                RectMesh.CreateSquare(new Vector2(0.1, 2)).SetCenter(new Vector2(4, 1)).SetColor(new Color(150, 150, 150, 255)),
+                RectMesh.CreateSquare(new Vector2(0.1, 1.3)).SetCenter(new Vector2(2, 2.35)).SetColor(new Color(150, 150, 150, 255)),
+            ],
+            Camera.Create(new Vector2(6 * 0.1, 3 * 0.5), new Vector2(1, 0).normalize(), 90),
+            Light.Create(new Vector2(6 * 0.9, 3 * 0.25), 25));
+
+        return [scene1, scene2, scene3];
     }
 
-    public getSceneObjectAt(position: Vector2) : SceneObject | undefined {
-        for (let i = this.objects.length - 1; i >= 0; i--){
+    public getSceneObjectAt(position: Vector2): SceneObject | undefined {
+
+        if (!this.camera.static && this.camera.bounds.containsPoint(position)) {
+            return this.camera;
+        }
+
+        if (!this.light.static && this.light.bounds.containsPoint(position)) {
+            return this.light;
+        }
+
+        for (let i = this.objects.length - 1; i >= 0; i--) {
             const object = this.objects[i];
-            if(!object.static && object.bounds.containsPoint(position)) {
+            if (!object.static && object.bounds.containsPoint(position)) {
                 return object;
             }
         }
@@ -103,7 +121,6 @@ export class Scene {
                 }
             }
         }
-
         return closestHit;
     }
 
@@ -122,7 +139,6 @@ export class Scene {
         if (tmax < 0 || tmin > tmax) {
             return undefined;
         }
-
         const t = tmin < 0 ? tmax : tmin;
         const point = from.add(dir.multiply(t));
         const normal = new Vector2(
@@ -130,6 +146,6 @@ export class Scene {
             t === t3 ? -1 : t === t4 ? 1 : 0
         );
 
-        return { point, normal };
+        return {point, normal};
     }
 }
